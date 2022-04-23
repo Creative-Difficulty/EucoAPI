@@ -90,6 +90,7 @@ function ERROR(message) {
 
 app.get("/" + path_after_url, function (req, res) {
     
+    var ipLocation = geoip.lookup(requestIP);
     DEBUG("REQUEST:")
     
     if(mode === "debug") {
@@ -106,7 +107,6 @@ app.get("/" + path_after_url, function (req, res) {
             
         } else {
             DEBUG(`IP: ${requestIP}`)
-            var ipLocation = geoip.lookup(requestIP);
             if(ipLocation === null) {
                 DEBUG("LOCATION: not accessible or in local network")
             } else {
