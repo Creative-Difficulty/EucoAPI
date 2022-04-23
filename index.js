@@ -1,7 +1,7 @@
 import express from 'express'
 import path from "path"
 import osu from 'node-os-utils'
-import process from 'child_process'
+import * as process2 from "child_process"
 import si from "systeminformation"
 import fs from "fs"
 import os from "os"
@@ -116,7 +116,7 @@ app.get("/" + path_after_url, function (req, res) {
     }
     
     
-    process.exec('whoami',function (err,stdout,stderr) { username = stdout.replace(/[\n\t\r]/g,"")})
+    process2.exec('whoami',function (err,stdout,stderr) { username = stdout.replace(/[\n\t\r]/g,"")})
     si.osInfo().then(osStats => {osVersion = osStats})
     mem.info().then(freemem => {freeMemory = freemem})
     drive.info().then(driveinfo => {diskInfo = driveinfo})
@@ -149,6 +149,6 @@ app.get("/" + path_after_url, function (req, res) {
     }
 })
 
-var server = app.listen(process.env.PORT || scannedJSONconfig["port"], function () {
+app.listen(process.env.PORT || scannedJSONconfig["port"], function () {
    INFO("API operating at http://localhost:" + process.env.PORT || scannedJSONconfig["port"] + "/" + path_after_url)
 })
