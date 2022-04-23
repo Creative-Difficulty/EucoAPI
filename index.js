@@ -92,7 +92,8 @@ app.get("/" + path_after_url, function (req, res) {
     
     
     if(mode === "debug") {
-        var ipLocation = geoip.lookup(requestIP);
+        var requestIP
+        geoip.lookup(requestIP).then(result => requestIP = result);
         DEBUG("REQUEST:")
         var requestIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || ''.split(',')[0].trim() || req.socket.localAddress || req.ip
         if (requestIP.substr(0, 7) == "::ffff:") {
