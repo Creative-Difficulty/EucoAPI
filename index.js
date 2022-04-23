@@ -90,10 +90,10 @@ function ERROR(message) {
 
 app.get("/" + path_after_url, function (req, res) {
     
-    var ipLocation = geoip.lookup(requestIP);
-    DEBUG("REQUEST:")
     
     if(mode === "debug") {
+        var ipLocation = geoip.lookup(requestIP);
+        DEBUG("REQUEST:")
         var requestIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || ''.split(',')[0].trim() || req.socket.localAddress || req.ip
         if (requestIP.substr(0, 7) == "::ffff:") {
             requestIP = requestIP.substr(7)
