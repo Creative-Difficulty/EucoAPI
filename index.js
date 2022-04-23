@@ -1,4 +1,5 @@
 import express from 'express'
+import path from "path"
 import osu from 'node-os-utils'
 import process from 'child_process'
 import si from "systeminformation"
@@ -30,7 +31,8 @@ ______                    ___ _____ _____
 | |___| |_| | (_| (_) / ____ | |  __| |_
 |________,_|______/_ / /____ |__||______|
 `)
-    
+
+
 
 
 fs.readFile("./config.json", (err, file) => {
@@ -62,7 +64,6 @@ try {
 }
 
 var path_after_url = scannedJSONconfig["path_after_url"]
-var port = scannedJSONconfig["port"]
 var mode = scannedJSONconfig["mode"]
 
 function INFO(message) {
@@ -148,6 +149,6 @@ app.get("/" + path_after_url, function (req, res) {
     }
 })
 
-var server = app.listen(port, function () {
-   INFO("API operating at http://localhost:" + port + "/" + path_after_url)
+var server = app.listen(process.env.PORT || scannedJSONconfig["port"], function () {
+   INFO("API operating at http://localhost:" + process.env.PORT || scannedJSONconfig["port"] + "/" + path_after_url)
 })
