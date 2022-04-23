@@ -29,7 +29,6 @@ console.log("Welcome to EucoAPIv0.1")
 
 
 var port = process.env.PORT
-
 var path_after_url = process.env.PATH_AFTER_URL
 var mode = process.env.MODE
 
