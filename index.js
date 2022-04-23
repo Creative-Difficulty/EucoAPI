@@ -88,12 +88,17 @@ function ERROR(message) {
     console.error(`[${time}/ERROR] ${message}`);
 }
 
+function getIP(IP) {
+    var requestLocation
+    const isIPformat = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
+    if(isIPformat.test(IP)) {
+        geoip.lookup(requestIP).then(result => {requestLocation = result})
+    }
+    return requestLocation;
+}
+
 app.get("/" + path_after_url, function (req, res) {
-    
-    
     if(mode === "debug") {
-        var requestIP
-        geoip.lookup(requestIP).then(result => requestIP = result);
         DEBUG("REQUEST:")
         var requestIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || ''.split(',')[0].trim() || req.socket.localAddress || req.ip
         if (requestIP.substr(0, 7) == "::ffff:") {
