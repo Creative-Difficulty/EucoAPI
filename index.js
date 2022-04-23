@@ -1,70 +1,42 @@
-import express from 'express'
-import path from "path"
-import osu from 'node-os-utils'
+import express from "express"
+import osu from "node-os-utils"
 import * as process2 from "child_process"
 import si from "systeminformation"
-import fs from "fs"
-import os from "os"
-import geoip from 'geoip-lite'
-import ip from "ip"
+import dotenv from 'dotenv'
+dotenv.config()
 
+import os from "os"
+import ip from "ip"
+import fetch from "node-fetch"
+
+var cpu = osu.cpu
+var drive = osu.drive
+var mem = osu.mem
 var diskInfo
 var Processorusage
 var freeMemory
 var osVersion
 var username;
-var cpu = osu.cpu
-var drive = osu.drive
-var mem = osu.mem
+
+
+
 var app = express();
 
-var configJSON = {port:5050, path_after_url:1, mode:"normal"}
 
 
+console.log("Welcome to EucoAPIv0.1")
 
 
-console.log(`
-______                    ___ _____ _____ 
-|  ____|                 /   |  __ |_   _|
-| |__  _   _  ___ ___   / __ | |__) | |  
-|  __|| | | |/ __/ _   / /  || ___/ | |  
-| |___| |_| | (_| (_) / ____ | |  __| |_
-|________,_|______/_ / /____ |__||______|
-`)
-
-
-
-
-fs.readFile("./config.json", (err, file) => {
-    if(file.length === 0) {
-        var today = new Date();
-        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        console.log("[INFO/" + time + "]" + "No config found, creating a new one...");
-        fs.writeFile("./config.json", JSON.stringify(configJSON), err => {if (err) ERROR(`an error ocurred while trying to write the config file: ${err}`)});
-    }
-    
-    if(err) {
-        ERROR(`an error ocurred while trying to read the config file: ${err}`)
-    }
-})
-
-
-var today = new Date();
-var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-console.log("[" + time + "/INFO]" + "reading config...");
-
-
-var scannedJSONconfig = fs.readFileSync("config.json", "utf8")
-
-try {
-    scannedJSONconfig = JSON.parse(scannedJSONconfig)
-} catch {
-    ERROR("corrupt config, creating a new one")
-    fs.writeFile("./config.json", JSON.stringify(configJSON), err => {if (err) console.log("Error writing config file:", err);});
+var port
+if (process.env._ && process.env._.indexOf("heroku") !== -1) {
+    delete process.env.PORT
+} else {
+    port = process.env.PORT
 }
 
-var path_after_url = scannedJSONconfig["path_after_url"]
-var mode = scannedJSONconfig["mode"]
+var path_after_url = process.env.PATH_AFTER_URL
+var mode = process.env.MODE
+
 
 function INFO(message) {
     if(mode === "normal" || mode === "debug") {
@@ -88,31 +60,36 @@ function ERROR(message) {
     console.error(`[${time}/ERROR] ${message}`);
 }
 
-function getIP(IP) {
-    var requestLocation
-    const isIPformat = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/gi;
-    if(isIPformat.test(IP)) {
-        geoip.lookup(requestIP).then(result => {requestLocation = result})
-    }
-    return requestLocation;
+async function getLocation(IP) {
+    
+    return ipLocation
 }
 
 app.get("/" + path_after_url, function (req, res) {
     if(mode === "debug") {
+        
         DEBUG("REQUEST:")
+        
         var requestIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || ''.split(',')[0].trim() || req.socket.localAddress || req.ip
         if (requestIP.substr(0, 7) == "::ffff:") {
             requestIP = requestIP.substr(7)
         }
+
+        
         
         var localIP = ip.address()
         
         if(req.socket.localAddress === requestIP) {
             DEBUG(`IP: this PCs IP (${localIP})`)
             DEBUG("LOCATION: Not accessible, the client is in the same network as the server")
-            
         } else {
             DEBUG(`IP: ${requestIP}`)
+            var ipLocation
+            var requestURL = "http://ip-api.com/json/" + requestIP
+            fetch(requestURL).then(jsonData => jsonData.json()).then(jsonData => {
+                ipLocation = jsonData
+                console.log(ipLocation)
+            })
             if(ipLocation === null) {
                 DEBUG("LOCATION: not accessible or in local network")
             } else {
@@ -155,6 +132,6 @@ app.get("/" + path_after_url, function (req, res) {
     }
 })
 
-app.listen(process.env.PORT || scannedJSONconfig["port"], function () {
-   INFO("API operating at http://localhost:" + process.env.PORT || scannedJSONconfig["port"] + "/" + path_after_url)
+app.listen(port, function () {
+   INFO("API operating at http://localhost:" + process.env.PORT + "/" + path_after_url)
 })
