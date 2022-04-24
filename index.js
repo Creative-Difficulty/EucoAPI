@@ -3,6 +3,7 @@ import osu from "node-os-utils"
 import * as process2 from "child_process"
 import si from "systeminformation"
 import dotenv from 'dotenv'
+import chalk from 'chalk';
 dotenv.config()
 
 import os from "os"
@@ -37,7 +38,15 @@ function INFO(message) {
     if(mode === "normal" || mode === "debug") {
         var today = new Date();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        console.log(`[${time}/INFO] ${message}`);
+        console.log(chalk.green("[" + time + "/INFO] " + message));
+    }
+}
+
+function WARN(message) {
+    if(mode === "normal" || mode === "debug") {
+        var today = new Date();
+        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+        console.warn(chalk.yellow("[" + time + "/WARN] " + message));
     }
 }
 
@@ -45,19 +54,14 @@ function DEBUG(message) {
     if(mode === "debug") {
         var today = new Date();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        console.warn(`[${time}/DEBUG] ${message}`);
+        console.log(chalk.blue("[" + time + "/DEBUG] " + message));
     }
 }
 
 function ERROR(message) {
     var today = new Date();
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    console.error(`[${time}/ERROR] ${message}`);
-}
-
-async function getLocation(IP) {
-    
-    return ipLocation
+    console.error(chalk.red("[" + time + "/ERROR] " + message));
 }
 
 app.get("/" + path_after_url, function (req, res) {
