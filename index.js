@@ -26,21 +26,11 @@ var osVersion
 var username;
 
 
-
-
-
-
 console.log("Welcome to EucoAPIv0.1")
 
 
-
-var port = process.env.PORT
-var path_after_url = process.env.PATH_AFTER_URL
-var mode = process.env.MODE
-
-
 function INFO(message) {
-    if(mode === "normal" || mode === "debug") {
+    if(process.env.MODE === "normal" || process.env.MODE === "debug") {
         var today = new Date();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         console.log(chalk.green("[" + time + "/INFO] " + message));
@@ -48,15 +38,15 @@ function INFO(message) {
 }
 
 function WARN(message) {
-    if(mode === "normal" || mode === "debug") {
+    if(process.env.MODE === "normal" || process.env.MODE === "debug") {
         var today = new Date();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        console.warn(chalk.yellow("[" + time + "/WARN] " + message));
+        console.warn(chalk.bgYellow("[" + time + "/WARN] " + message));
     }
 }
 
 function DEBUG(message) {
-    if(mode === "debug") {
+    if(process.env.MODE === "debug") {
         var today = new Date();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         console.log(chalk.blue("[" + time + "/DEBUG] " + message));
@@ -69,13 +59,20 @@ function ERROR(message) {
     console.error(chalk.red("[" + time + "/ERROR] " + message));
 }
 
+if(/\s/.test(process.env.PATH_AFTER_URL)) {
+    WARN("The environment variable PATH_AFTER_URL contains a whitespace, defaulting to none")
+    process.env.PATH_AFTER_URL = ""
+}
+
 const start = Date.now();
 for(let i = 0; i<1000; i++) {
     i++;
 }
 const finish = Date.now();
-app.get("/" + path_after_url, function (req, res) {
-    if(mode === "debug") {
+var TimeTakenForTest = finish - start
+
+app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
+    if(process.env.MODE === "debug") {
         DEBUG("REQUEST:")
         
         var requestIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || ''.split(',')[0].trim() || req.socket.localAddress || req.ip
@@ -126,13 +123,14 @@ app.get("/" + path_after_url, function (req, res) {
         "cpu_type" : os.cpus(),
         "storage_info" : diskInfo,
         "os_version" : osVersion,
+        "performance_test": TimeTakenForTest
     }
     
     try {
         res.send(data)
         INFO("Request made, content served successfully")
         DEBUG("content served successfully")
-        if(mode === "debug") {
+        if(process.env.MODE === "debug") {
             console.log("")
         }
     } catch(err) {
@@ -140,6 +138,6 @@ app.get("/" + path_after_url, function (req, res) {
     }
 })
 
-app.listen(port, function () {
-   INFO("API operating at http://localhost:" + process.env.PORT + "/" + path_after_url)
+app.listen(process.env.PORT, function () {
+   INFO("API operating at http://localhost:" + process.env.PORT + "/" + process.env.PATH_AFTER_URL)
 })
