@@ -69,9 +69,13 @@ function ERROR(message) {
     console.error(chalk.red("[" + time + "/ERROR] " + message));
 }
 
+const start = Date.now();
+for(let i = 0; i<1000; i++) {
+    i++;
+}
+const finish = Date.now();
 app.get("/" + path_after_url, function (req, res) {
     if(mode === "debug") {
-        
         DEBUG("REQUEST:")
         
         var requestIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || ''.split(',')[0].trim() || req.socket.localAddress || req.ip
