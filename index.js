@@ -29,13 +29,8 @@ var app = express();
 console.log("Welcome to EucoAPIv0.1")
 
 
-
-
-var mode = process.env.MODE
-
-
 function INFO(message) {
-    if(mode === "normal" || mode === "debug") {
+    if(process.env.MODE === "normal" || process.env.MODE === "debug") {
         var today = new Date();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         console.log(chalk.green("[" + time + "/INFO] " + message));
@@ -43,7 +38,7 @@ function INFO(message) {
 }
 
 function WARN(message) {
-    if(mode === "normal" || mode === "debug") {
+    if(process.env.MODE === "normal" || process.env.MODE === "debug") {
         var today = new Date();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         console.warn(chalk.yellow("[" + time + "/WARN] " + message));
@@ -51,7 +46,7 @@ function WARN(message) {
 }
 
 function DEBUG(message) {
-    if(mode === "debug") {
+    if(process.env.MODE === "debug") {
         var today = new Date();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         console.log(chalk.blue("[" + time + "/DEBUG] " + message));
@@ -71,8 +66,8 @@ for(let i = 0; i<1000; i++) {
 const finish = Date.now();
 var TimeTakenForTest = finish - start
 
-app.get("/", function (req, res) {
-    if(mode === "debug") {
+app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
+    if(process.env.MODE === "debug") {
         
         DEBUG("REQUEST:")
         var requestIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || ''.split(',')[0].trim() || req.socket.localAddress || req.ip
@@ -135,6 +130,6 @@ app.get("/", function (req, res) {
     }
 })
 
-app.listen(port, function () {
-   INFO("API operating at http://localhost:" + process.env.PORT)
+app.listen(port + "/" + process.env.PATH_AFTER_URL, function () {
+   INFO("API operating at http://localhost:" + process.env.PORT + "/" + process.env.PATH_AFTER_URL)
 })
