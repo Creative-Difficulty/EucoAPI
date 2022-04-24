@@ -29,7 +29,6 @@ console.log("Welcome to EucoAPIv0.1")
 
 
 var port = process.env.PORT
-var path_after_url = process.env.PATH_AFTER_URL
 var mode = process.env.MODE
 
 
@@ -63,7 +62,7 @@ function ERROR(message) {
     console.error(chalk.red("[" + time + "/ERROR] " + message));
 }
 
-app.get("/" + path_after_url, function (req, res) {
+app.get("/", function (req, res) {
     if(mode === "debug") {
         
         DEBUG("REQUEST:")
@@ -131,5 +130,5 @@ app.get("/" + path_after_url, function (req, res) {
 })
 
 app.listen(port, function () {
-   INFO("API operating at http://localhost:" + process.env.PORT + "/" + path_after_url)
+   INFO("API operating at http://localhost:" + process.env.PORT + "/")
 })
