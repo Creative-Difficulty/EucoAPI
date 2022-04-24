@@ -70,6 +70,7 @@ for(let i = 0; i<1000; i++) {
 }
 const finish = Date.now();
 var TimeTakenForTest = finish - start
+
 app.get("/", function (req, res) {
     if(mode === "debug") {
         
@@ -129,9 +130,6 @@ app.get("/", function (req, res) {
         res.send(data)
         INFO("Request made, content served successfully")
         DEBUG("content served successfully")
-        if(mode === "debug") {
-            console.log("")
-        }
     } catch(err) {
        ERROR("An error occurred while responding to an API request: ", err)
     }
