@@ -64,15 +64,16 @@ if(/\s/.test(process.env.PATH_AFTER_URL)) {
     process.env.PATH_AFTER_URL = ""
 }
 
+if(process.env.MODE === ""|| /\s/.test(process.env.MODE)) {
+    WARN("The environment variable MODE isnt set or isnt properly set, defaulting to normal")
+    process.env.MODE = "normal"
+}
+
 if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
     WARN("The environment variable PORT isnt set or isnt properly set, defaulting to 8082")
     process.env.PORT = 8082
 }
 
-if(process.env.MODE === ""|| /\s/.test(process.env.MODE)) {
-    WARN("The environment variable MODE isnt set or isnt properly set, defaulting to normal")
-    process.env.MODE = "normal"
-}
 
 const start = Date.now();
 for(let i = 0; i<1000; i++) {
