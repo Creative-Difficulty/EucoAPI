@@ -1,18 +1,24 @@
+
 import express from "express"
+var app = express();
+
 import osu from "node-os-utils"
+var cpu = osu.cpu
+var drive = osu.drive
+var mem = osu.mem
+
 import * as process2 from "child_process"
 import si from "systeminformation"
+
 import dotenv from 'dotenv'
-import chalk from 'chalk';
 dotenv.config()
+
+import chalk from 'chalk';
 
 import os from "os"
 import ip from "ip"
 import fetch from "node-fetch"
 
-var cpu = osu.cpu
-var drive = osu.drive
-var mem = osu.mem
 var diskInfo
 var Processorusage
 var freeMemory
@@ -21,7 +27,6 @@ var username;
 
 
 
-var app = express();
 
 
 
