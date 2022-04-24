@@ -2,9 +2,8 @@ import express from "express"
 import osu from "node-os-utils"
 import * as process2 from "child_process"
 import si from "systeminformation"
-import dotenv from 'dotenv'
 import chalk from 'chalk';
-dotenv.config()
+
 
 import os from "os"
 import ip from "ip"
