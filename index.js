@@ -123,11 +123,11 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
     cpu.usage().then(usage => {Processorusage = usage})
     var cpuCoresInfo = os.cpus()
     var cpuCoresInfo = cpuCoresInfo[1]
-    
+    var data;
     var today = new Date();
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
     
-    var data = {
+    data = {
         "success" : true,
         "time" : time,
         "cpu_usage" : Processorusage,
@@ -141,7 +141,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
     }
     
     if(ReqCounter > 2) {
-        var data = {
+        data = {
             "time" : time,
             "cpu_usage" : Processorusage,
             "RAM" : freeMemory,
