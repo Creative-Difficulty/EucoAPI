@@ -58,6 +58,15 @@ function ERROR(message) {
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
     console.error(chalk.red("[" + time + "/ERROR] " + message));
 }
+if(/\s/.test(process.env.PATH_AFTER_URL)) {
+    WARN("The environment variable PATH_AFTER_URL contains a whitespace, defaulting to none")
+    process.env.PATH_AFTER_URL = ""
+}
+
+if(process.env.MODE === ""|| /\s/.test(process.env.MODE)) {
+    WARN("The environment variable MODE isnt set or isnt properly set, defaulting to normal")
+    process.env.MODE = "normal"
+}
 
 const start = Date.now();
 for(let i = 0; i<1000; i++) {
