@@ -69,8 +69,8 @@ for(let i = 0; i<1000; i++) {
     i++;
 }
 const finish = Date.now();
+var TimeTakenForTest = finish - start
 app.get("/", function (req, res) {
-    var timeTakenForTest = finish - start;
     if(mode === "debug") {
         
         DEBUG("REQUEST:")
@@ -122,7 +122,7 @@ app.get("/", function (req, res) {
         "cpu_type" : os.cpus(),
         "storage_info" : diskInfo,
         "os_version" : osVersion,
-        "performance_test": timeTakenForTest
+        "performance_test": TimeTakenForTest
     }
     
     try {
