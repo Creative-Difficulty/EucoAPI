@@ -4,6 +4,8 @@ import * as process2 from "child_process"
 import si from "systeminformation"
 import chalk from 'chalk';
 
+import dotenv from 'dotenv'
+dotenv.config()
 
 import os from "os"
 import ip from "ip"
@@ -28,7 +30,7 @@ console.log("Welcome to EucoAPIv0.1")
 
 
 
-var port = process.env.PORT
+
 var mode = process.env.MODE
 
 
@@ -62,7 +64,13 @@ function ERROR(message) {
     console.error(chalk.red("[" + time + "/ERROR] " + message));
 }
 
+const start = Date.now();
+for(let i = 0; i<1000; i++) {
+    i++;
+}
+const finish = Date.now();
 app.get("/", function (req, res) {
+    var timeTakenForTest = finish - start;
     if(mode === "debug") {
         
         DEBUG("REQUEST:")
@@ -115,6 +123,7 @@ app.get("/", function (req, res) {
         "cpu_type" : os.cpus(),
         "storage_info" : diskInfo,
         "os_version" : osVersion,
+        "performance_test": timeTakenForTest
     }
     
     try {
@@ -130,5 +139,5 @@ app.get("/", function (req, res) {
 })
 
 app.listen(port, function () {
-   INFO("API operating at http://localhost:" + process.env.PORT + "/")
+   INFO("API operating at http://localhost:" + process.env.PORT)
 })
