@@ -19,6 +19,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "chalk": "^5.0.1",
+    "cpu-benchmark": "^1.0.1",
     "dotenv": "^16.0.0",
     "express": "^4.17.2",
     "fs": "^0.0.1-security",

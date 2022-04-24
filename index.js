@@ -2,7 +2,9 @@
 import express from "express"
 var app = express();
 
-import osu from "node-os-utils"
+import {fib, dist} from "cpu-benchmark";
+
+import osu from "node-os-utils";
 var cpu = osu.cpu
 var drive = osu.drive
 var mem = osu.mem
@@ -18,6 +20,7 @@ import chalk from 'chalk';
 import os from "os"
 import ip from "ip"
 import fetch from "node-fetch"
+import cpuBenchmark from "cpu-benchmark";
 
 var diskInfo
 var Processorusage
@@ -33,7 +36,7 @@ function INFO(message) {
     if(process.env.MODE === "normal" || process.env.MODE === "debug") {
         var today = new Date();
         var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        console.log(chalk.green("[" + time + "/INFO] " + message));
+        console.log("[" + time + "/INFO] " + message);
     }
 }
 
@@ -75,14 +78,12 @@ if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
 }
 
 
-const start = Date.now();
-for(let i = 0; i<1000; i++) {
-    i++;
-}
-const finish = Date.now();
-var TimeTakenForTest = finish - start
+var ReqCounter = 0;
+
 
 app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
+    ReqCounter++;
+    var msTakenforTest = fib(41)
     if(process.env.MODE === "debug") {
         DEBUG("REQUEST:")
         
@@ -90,7 +91,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         if (requestIP.substr(0, 7) == "::ffff:") {
             requestIP = requestIP.substr(7)
         }
-
+        
         
         
         var localIP = ip.address()
@@ -120,10 +121,12 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
     mem.info().then(freemem => {freeMemory = freemem})
     drive.info().then(driveinfo => {diskInfo = driveinfo})
     cpu.usage().then(usage => {Processorusage = usage})
-
+    var cpuCoresInfo = os.cpus()
+    var cpuCoresInfo = cpuCoresInfo[1]
+    
     var today = new Date();
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-
+    
     var data = {
         "success" : true,
         "time" : time,
@@ -131,10 +134,20 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         "cpu_core_count" : cpu.count(),
         "logged_in_user" : username,
         "RAM" : freeMemory,
-        "cpu_type" : os.cpus(),
+        "cpu_type" : cpuCoresInfo,
         "storage_info" : diskInfo,
         "os_version" : osVersion,
-        "performance_test": TimeTakenForTest
+        "performance_test": msTakenforTest
+    }
+    
+    if(ReqCounter > 2) {
+        var data = {
+            "time" : time,
+            "cpu_usage" : Processorusage,
+            "RAM" : freeMemory,
+            "storage_info" : diskInfo,
+            "performance_test": msTakenforTest
+        }
     }
     
     try {
@@ -150,5 +163,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
 })
 
 app.listen(process.env.PORT, function () {
+    
    INFO("API operating at http://localhost:" + process.env.PORT + "/" + process.env.PATH_AFTER_URL)
 })
+  
