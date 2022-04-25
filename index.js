@@ -20,7 +20,6 @@ import chalk from 'chalk';
 import os from "os"
 import ip from "ip"
 import fetch from "node-fetch"
-import cpuBenchmark from "cpu-benchmark";
 
 var diskInfo
 var Processorusage
