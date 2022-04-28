@@ -82,7 +82,7 @@ var ReqCounter = 0;
 
 app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
     ReqCounter++;
-    var msTakenforTest = fib(41)
+    var msTakenforTest = fib(30)
     if(process.env.MODE === "debug") {
         DEBUG("REQUEST:")
         
@@ -139,7 +139,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         "performance_test": msTakenforTest
     }
     
-    if(ReqCounter > 2) {
+    if(ReqCounter > 3) {
         data = {
             "time" : time,
             "cpu_usage" : Processorusage,
