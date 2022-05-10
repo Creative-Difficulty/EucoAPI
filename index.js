@@ -21,6 +21,8 @@ import os from "os"
 import ip from "ip"
 import fetch from "node-fetch"
 
+import isPi from "detect-rpi"
+
 var diskInfo
 var Processorusage
 var freeMemory
@@ -79,7 +81,6 @@ if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
 
 var ReqCounter = 0;
 
-
 app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
     ReqCounter++;
     var msTakenforTest = fib(30)
@@ -109,11 +110,19 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             if(ipLocation === null) {
                 DEBUG("LOCATION: not accessible or in local network")
             } else {
-                DEBUG(`LOCATION: ${ipLocation}`)
+                DEBUG("LOCATION:" + ipLocation)
             }
         }
     }
     
+    var isRaspi;
+    var piTemp
+    var piVoltage;
+    if(isPi()) {
+        isRaspi = true;
+        process2.exec("vcgencmd measure_temp",function (err,stdout,stderr) {stdout.split("="); var stdout1 = stdout[1].split("'"); piTemp = stdout1[0]})
+        process2.exec("vcgencmd measure_volts",function (err,stdout,stderr) {stdout.split("="); piVoltage = stdout[1].replace("V", "")})
+    }
     
     process2.exec('whoami',function (err,stdout,stderr) { username = stdout.replace(/[\n\t\r]/g,"")})
     si.osInfo().then(osStats => {osVersion = osStats})
@@ -125,7 +134,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
     var data;
     var today = new Date();
     var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    
+
     data = {
         "success" : true,
         "time" : time,
@@ -136,7 +145,13 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         "cpu_type" : cpuCoresInfo,
         "storage_info" : diskInfo,
         "os_version" : osVersion,
-        "performance_test": msTakenforTest
+        "performance_test": msTakenforTest,
+        "Raspi": {
+            "is_pi": isRaspi,
+            "cpu_temp": piTemp,
+            "cpu_voltage": piVoltage
+        },
+        
     }
     
     if(ReqCounter > 3) {
@@ -148,6 +163,43 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             "performance_test": msTakenforTest
         }
     }
+
+    if(isPi()) {
+        data = {
+            "success" : true,
+            "time" : time,
+            "cpu_usage" : Processorusage,
+            "cpu_core_count" : cpu.count(),
+            "logged_in_user" : username,
+            "RAM" : freeMemory,
+            "cpu_type" : cpuCoresInfo,
+            "storage_info" : diskInfo,
+            "os_version" : osVersion,
+            "performance_test": msTakenforTest,
+            "Raspi": {
+                "is_pi": isRaspi,
+                "cpu_temp": piTemp,
+                "cpu_voltage": piVoltage
+            }
+                
+        }
+
+        if(ReqCounter > 3) {
+            data = {
+                "time" : time,
+                "cpu_usage" : Processorusage,
+                "RAM" : freeMemory,
+                "storage_info" : diskInfo,
+                "performance_test": msTakenforTest,
+                "Raspi": {
+                    "is_pi": isRaspi,
+                    "cpu_temp": piTemp,
+                    "cpu_voltage": piVoltage
+                }
+            }
+        }
+    }
+    
     
     try {
         res.send(data)
