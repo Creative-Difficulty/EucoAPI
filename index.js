@@ -32,49 +32,18 @@ var username;
 
 console.log("Welcome to EucoAPIv0.1")
 
-
-function INFO(message) {
-    if(process.env.MODE === "normal" || process.env.MODE === "debug") {
-        var today = new Date();
-        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        console.log("[" + time + "/INFO] " + message);
-    }
-}
-
-function WARN(message) {
-    if(process.env.MODE === "normal" || process.env.MODE === "debug") {
-        var today = new Date();
-        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        console.warn(chalk.bgYellow("[" + time + "/WARN] " + message));
-    }
-}
-
-function DEBUG(message) {
-    if(process.env.MODE === "debug") {
-        var today = new Date();
-        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-        console.log(chalk.blue("[" + time + "/DEBUG] " + message));
-    }
-}
-
-function ERROR(message) {
-    var today = new Date();
-    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-    console.error(chalk.red("[" + time + "/ERROR] " + message));
-}
-
 if(/\s/.test(process.env.PATH_AFTER_URL)) {
-    WARN("The environment variable PATH_AFTER_URL contains a whitespace, defaulting to none")
+    console.log("The environment variable PATH_AFTER_URL contains a whitespace, defaulting to none")
     process.env.PATH_AFTER_URL = ""
 }
 
 if(process.env.MODE === ""|| /\s/.test(process.env.MODE)) {
-    WARN("The environment variable MODE isnt set or isnt properly set, defaulting to normal")
+    console.log("The environment variable MODE isnt set or isnt properly set, defaulting to normal")
     process.env.MODE = "normal"
 }
 
 if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
-    WARN("The environment variable PORT isnt set or isnt properly set, defaulting to 8082")
+    console.log("The environment variable PORT isnt set or isnt properly set, defaulting to 8082")
     process.env.PORT = 8082
 }
 
@@ -85,7 +54,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
     ReqCounter++;
     var msTakenforTest = fib(30)
     if(process.env.MODE === "debug") {
-        DEBUG("REQUEST:")
+        console.log("REQUEST:")
         
         var requestIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || ''.split(',')[0].trim() || req.socket.localAddress || req.ip
         if (requestIP.substr(0, 7) == "::ffff:") {
@@ -97,10 +66,10 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         var localIP = ip.address()
         
         if(req.socket.localAddress === requestIP) {
-            DEBUG(`IP: this PCs IP (${localIP})`)
-            DEBUG("LOCATION: Not accessible, the client is in the same network as the server")
+            console.log(`IP: this PCs IP (${localIP})`)
+            console.log("LOCATION: Not accessible, the client is in the same network as the server")
         } else {
-            DEBUG(`IP: ${requestIP}`)
+            console.log(`IP: ${requestIP}`)
             var ipLocation
             var requestURL = "http://ip-api.com/json/" + requestIP
             fetch(requestURL).then(jsonData => jsonData.json()).then(jsonData => {
@@ -108,9 +77,9 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
                 console.log(ipLocation)
             })
             if(ipLocation === null) {
-                DEBUG("LOCATION: not accessible or in local network")
+                console.log("LOCATION: not accessible or in local network")
             } else {
-                DEBUG("LOCATION:" + ipLocation)
+                console.log("LOCATION:" + ipLocation)
             }
         }
     }
@@ -203,18 +172,18 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
     
     try {
         res.send(data)
-        INFO("Request made, content served successfully")
-        DEBUG("content served successfully")
+        console.log("Request made, content served successfully")
+        console.log("content served successfully")
         if(process.env.MODE === "debug") {
             console.log("")
         }
     } catch(err) {
-       ERROR("An error occurred while responding to an API request: ", err)
+       console.log("An error occurred while responding to an API request: ", err)
     }
 })
 
 app.listen(process.env.PORT, function () {
     
-   INFO("API operating at http://localhost:" + process.env.PORT + "/" + process.env.PATH_AFTER_URL)
+   console.log("API operating at http://localhost:" + process.env.PORT + "/" + process.env.PATH_AFTER_URL)
 })
   
