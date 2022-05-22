@@ -122,16 +122,6 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         },
         
     }
-    
-    if(ReqCounter > 3) {
-        data = {
-            "time" : time,
-            "cpu_usage" : Processorusage,
-            "RAM" : freeMemory,
-            "storage_info" : diskInfo,
-            "performance_test": msTakenforTest
-        }
-    }
 
     if(isPi()) {
         data = {
@@ -151,21 +141,6 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
                 "cpu_voltage": piVoltage
             }
                 
-        }
-
-        if(ReqCounter > 3) {
-            data = {
-                "time" : time,
-                "cpu_usage" : Processorusage,
-                "RAM" : freeMemory,
-                "storage_info" : diskInfo,
-                "performance_test": msTakenforTest,
-                "Raspi": {
-                    "is_pi": isRaspi,
-                    "cpu_temp": piTemp,
-                    "cpu_voltage": piVoltage
-                }
-            }
         }
     }
     
