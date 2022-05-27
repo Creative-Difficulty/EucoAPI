@@ -7,7 +7,7 @@
  ```bash
  docker build . -t creative-difficulty/eucoapi_1
  ```
- to build a container (this might take a while). To verify that you have the image installed successfully, run ```docker images```. You should see ```creative-difficulty/eucoapi_1``` in the list.
+ to build a container (this might take a while). To verify that you have installed the image successfully, run ```docker images```. You should see ```creative-difficulty/eucoapi_1``` in the list.
 Now run 
  ```bash
 docker run -p 49160:8082 -d creative-difficulty/eucoapi_1
