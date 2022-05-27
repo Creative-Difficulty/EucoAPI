@@ -1,7 +1,7 @@
 # EucoAPI
  API for computer parameters
  
- ##Docker 🐳
+##Docker 🐳
  After successfully cloning (```git clone git clone https://github.com/Creative-Difficulty/EucoAPI/ ```) this repository, you can use 
  ```bash
  docker build . -t creative-difficulty/eucoapi_1
