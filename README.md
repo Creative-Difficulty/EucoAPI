@@ -16,4 +16,5 @@ docker run -p 49160:8082 -d creative-difficulty/eucoapi_1
  You can replace ```8082``` with the physical port you want EucoAPI running at.
  to view the console output of EucoAPI, first get its CONTAINER ID (```docker ps```).
  Then run ```docker logs <CONTAINER ID>```. 
+ 
  Happy Docking!
