@@ -1,9 +1,9 @@
 # EucoAPI
   A JSON REST API for computer parameters and performance built with NodeJS and using [express](https://www.npmjs.com/package/express), [node-os-utils](https://www.npmjs.com/package/node-os-utils), [cpu-benchmark](https://www.npmjs.com/package/cpu-benchmark), [systeminformation](https://www.npmjs.com/package/systeminformation) and [special raspberry Pi-only features](https://www.npmjs.com/package/detect-rpi). Other used utility packages include [os](https://www.npmjs.com/package/os), [ip](https://www.npmjs.com/package/ip) (to check if a string is an IP), [fetch](https://www.npmjs.com/package/node-fetch) (to get JSON data)
   
-##Next release⚡️:
+## Next release⚡️:
 * Migrate to node-native fetch
-* use [ip](https://www.npmjs.com/package/pi-printemps) to get Raspberry Pi-only data
+* use [pi-printemps](https://www.npmjs.com/package/pi-printemps) to get Raspberry Pi-only data
 * simplify response structure
  
 ## Installation
