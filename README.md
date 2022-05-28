@@ -1,39 +1,18 @@
 # EucoAPI
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
- API for computer parameters
-=======
-  A JSON REST API for computer parameters and performance built with NodeJS and using [express](https://www.npmjs.com/package/express), [node-os-utils](https://www.npmjs.com/package/node-os-utils), [cpu-benchmark](https://www.npmjs.com/package/cpu-benchmark), [systeminformation](https://www.npmjs.com/package/systeminformation) and [special raspberry Pi-only features](https://www.npmjs.com/package/detect-rpi). Other used utility packages include [os](https://www.npmjs.com/package/os), [ip](https://www.npmjs.com/package/ip) (to check if a string is an IP), [fetch](https://www.npmjs.com/package/node-fetch) (to get JSON data)
-  
-## Installation
-Simply clone (```git clone https://github.com/Creative-Difficulty/EucoAPI/ ```) this repository and ```cd``` into it. now run either ```npm run monitoring``` or ```npm run website```.
+   A JSON REST API for computer parameters and performance built with NodeJS and using [express](https://www.npmjs.com/package/express), [node-os-utils](https://www.npmjs.com/package/node-os-utils), [cpu-benchmark](https://www.npmjs.com/package/cpu-benchmark), [systeminformation](https://www.npmjs.com/package/systeminformation) and [special raspberry Pi-only features](https://www.npmjs.com/package/detect-rpi). Other used utility packages include [os](https://www.npmjs.com/package/os), [ip](https://www.npmjs.com/package/ip) (to check if a string is an IP), [fetch](https://www.npmjs.com/package/node-fetch) (to get JSON data)
+   A JSON REST API for computer parameters and performance built with NodeJS and using [express](https://www.npmjs.com/package/express), [node-os-utils](https://www.npmjs.com/package/node-os-utils), [cpu-benchmark](https://www.npmjs.com/package/cpu-benchmark), [systeminformation](https://www.npmjs.com/package/systeminformation) and [special raspberry Pi-only features](https://www.npmjs.com/package/detect-rpi). Other used utility packages include [os](https://www.npmjs.com/package/os), [ip](https://www.npmjs.com/package/ip) (to check if a string is an IP) and [fetch](https://www.npmjs.com/package/node-fetch) (to get JSON data)
+
+ ## Installation
+ Simply clone (```git clone https://github.com/Creative-Difficulty/EucoAPI/ ```) this repository and ```cd``` into it. now run either ```npm run monitoring``` or ```npm run website```.
   
 ## Next release⚡️:
 * Migrate to node-native fetch
 * use [pi-printemps](https://www.npmjs.com/package/pi-printemps) to get Raspberry Pi-only data
 * simplify response structure
->>>>>>> parent of 59afdb3 (Update README.md)
  
 ## Docker 🐳
  
- After successfully cloning (```git clone git clone https://github.com/Creative-Difficulty/EucoAPI/ ```) this repository, you can use 
-=======
-
-=======
->>>>>>> parent of fe711bc (update readme)
- API for computer parameters
- 
-## Docker 🐳
-<<<<<<< HEAD
-
- After successfully cloning (```git clone git clone https://github.com/Creative-Difficulty/EucoAPI/```) this repository, you can use
-
->>>>>>> parent of 30b702b (Update README.md)
-=======
- 
- After successfully cloning (```git clone git clone https://github.com/Creative-Difficulty/EucoAPI/ ```) this repository, you can use 
->>>>>>> parent of fe711bc (update readme)
+ After successfully cloning (```git clone https://github.com/Creative-Difficulty/EucoAPI/ ```) this repository, you can use 
  ```bash
  docker build . -t creative-difficulty/eucoapi_1
  ```
