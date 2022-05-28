@@ -1,5 +1,6 @@
 # EucoAPI
 <<<<<<< HEAD
+<<<<<<< HEAD
  API for computer parameters
  
 ## Docker 🐳
@@ -7,13 +8,20 @@
  After successfully cloning (```git clone git clone https://github.com/Creative-Difficulty/EucoAPI/ ```) this repository, you can use 
 =======
 
+=======
+>>>>>>> parent of fe711bc (update readme)
  API for computer parameters
-
+ 
 ## Docker 🐳
+<<<<<<< HEAD
 
  After successfully cloning (```git clone git clone https://github.com/Creative-Difficulty/EucoAPI/```) this repository, you can use
 
 >>>>>>> parent of 30b702b (Update README.md)
+=======
+ 
+ After successfully cloning (```git clone git clone https://github.com/Creative-Difficulty/EucoAPI/ ```) this repository, you can use 
+>>>>>>> parent of fe711bc (update readme)
  ```bash
  docker build . -t creative-difficulty/eucoapi_1
  ```
