@@ -1,9 +1,12 @@
 # EucoAPI
  API for computer parameters
  
+## Installation
+Simply clone (```git clone https://github.com/Creative-Difficulty/EucoAPI/ ```) this repository and ```cd``` into it. now run either ```npm run monitoring``` or ```npm run website```.
+ 
 ## Docker 🐳
  
- After successfully cloning (```git clone git clone https://github.com/Creative-Difficulty/EucoAPI/ ```) this repository, you can use 
+ After successfully cloning (```git clone https://github.com/Creative-Difficulty/EucoAPI/ ```) this repository, you can use 
  ```bash
  docker build . -t creative-difficulty/eucoapi_1
  ```
