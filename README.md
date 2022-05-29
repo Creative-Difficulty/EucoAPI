@@ -14,9 +14,7 @@
  
  After successfully cloning (```git clone https://github.com/Creative-Difficulty/EucoAPI/```) this repository, first run ```bash cd EucoAPI```.
  Run ```bash
- docker build . -t creative-difficulty/eucoapi_1
- ```
- to build the container (this might take a while). To verify that you have installed the image successfully, run ```docker images```. You should see ```creative-difficulty/eucoapi_1``` in the list.
+ docker build . -t creative-difficulty/eucoapi_1``` to build the container (this might take a while). To verify that you have installed the image successfully, run ```docker images```. You should see ```creative-difficulty/eucoapi_1``` in the list.
 Now type 
  ```bash
 docker run -p 8081:8082 -d creative-difficulty/eucoapi_1
