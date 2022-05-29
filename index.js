@@ -15,8 +15,6 @@ import si from "systeminformation"
 import dotenv from 'dotenv'
 dotenv.config()
 
-import chalk from 'chalk';
-
 import os from "os"
 import ip from "ip"
 import fetch from "node-fetch"
@@ -55,16 +53,16 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
     var msTakenforTest = fib(30)
     if(process.env.MODE === "debug") {
         console.log("REQUEST:")
-        
+
         var requestIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || ''.split(',')[0].trim() || req.socket.localAddress || req.ip
         if (requestIP.substr(0, 7) == "::ffff:") {
             requestIP = requestIP.substr(7)
         }
-        
-        
-        
+
+
+
         var localIP = ip.address()
-        
+
         if(req.socket.localAddress === requestIP) {
             console.log(`IP: this PCs IP (${localIP})`)
             console.log("LOCATION: Not accessible, the client is in the same network as the server")
@@ -83,7 +81,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             }
         }
     }
-    
+
     var isRaspi;
     var piTemp
     var piVoltage;
@@ -92,7 +90,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         process2.exec("vcgencmd measure_temp",function (err,stdout,stderr) {stdout.split("="); var stdout1 = stdout[1].split("'"); piTemp = stdout1[0]})
         process2.exec("vcgencmd measure_volts",function (err,stdout,stderr) {stdout.split("="); piVoltage = stdout[1].replace("V", "")})
     }
-    
+
     process2.exec('whoami',function (err,stdout,stderr) { username = stdout.replace(/[\n\t\r]/g,"")})
     si.osInfo().then(osStats => {osVersion = osStats})
     mem.info().then(freemem => {freeMemory = freemem})
@@ -120,7 +118,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             "cpu_temp": piTemp,
             "cpu_voltage": piVoltage
         },
-        
+
     }
 
     if(isPi()) {
@@ -140,11 +138,11 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
                 "cpu_temp": piTemp,
                 "cpu_voltage": piVoltage
             }
-                
+
         }
     }
-    
-    
+
+
     try {
         res.send(data)
         console.log("Request made, content served successfully")
@@ -158,7 +156,6 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
 })
 
 app.listen(process.env.PORT, function () {
-    
+
    console.log("API operating at http://localhost:" + process.env.PORT + "/" + process.env.PATH_AFTER_URL)
 })
-  
