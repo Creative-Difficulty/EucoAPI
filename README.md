@@ -26,6 +26,7 @@ docker run -p 8081:8082 -d creative-difficulty/eucoapi_1
  
  to view the console output of EucoAPI, first get its CONTAINER ID (```docker ps```).
  Then run ```docker logs <CONTAINER ID>```.
- To access the API, go to ```url http://localhost:<PHYSICAL PORT>``` (if you havent modified anything its ```8082```)
+ To access the API, go to ```http://localhost:<PHYSICAL PORT>``` (if you havent modified anything its ```8082```)
+ If you want to make it accessible outside of your network you can [port forward](https://portforward.com) the ```<PHYSICAL PORT>```!
  
  Happy Docking!
