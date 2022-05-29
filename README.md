@@ -25,6 +25,7 @@ docker run -p 8081:8082 -d creative-difficulty/eucoapi_1
  ```bash docker run -p <VIRTUAL PORT>:<PHYSICAL PORT> -d creative-difficulty/eucoapi_1```
  
  to view the console output of EucoAPI, first get its CONTAINER ID (```docker ps```).
- Then run ```docker logs <CONTAINER ID>```. 
+ Then run ```docker logs <CONTAINER ID>```.
+ To access the API, go to ```http://localhost:<PHYSICAL PORT>``` (if you havent modified anything its 8082)
  
  Happy Docking!
