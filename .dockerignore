@@ -1,3 +1,6 @@
 node_modules
 npm-debug.log
 assets
+README.md
+LICENSE
+.DS_Store
