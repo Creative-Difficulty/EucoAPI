@@ -24,9 +24,10 @@ docker run -p 8081:8082 -d creative-difficulty/eucoapi_1
  Your command should be formatted like this: 
  ```bash docker run -p <VIRTUAL PORT>:<PHYSICAL PORT> -d creative-difficulty/eucoapi_1```
  
+ ⚠️WARNING⚠️: To properly modify the ```<PHYSICAL PORT>``` (port that the API is going to listen at) you have to change ```ENV PORT=8082``` in the ```Dockerfile```
  to view the console output of EucoAPI, first get its CONTAINER ID (```docker ps```).
  Then run ```docker logs <CONTAINER ID>```.
  To access the API, go to ```http://localhost:<PHYSICAL PORT>``` (if you havent modified anything its ```8082```)
- If you want to make it accessible outside of your network you can [port forward](https://portforward.com) the ```<PHYSICAL PORT>```!
+ If you want to make it accessible outside of your network you can [port forward](https://portforward.com) the ```<PHYSICAL PORT>```, DONT port forward the ```<VIRTUAL PORT>``` (You are opening unnecessary ports)!
  
  Happy Docking!
