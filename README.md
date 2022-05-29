@@ -12,17 +12,20 @@
  
 ## Docker 🐳
  
- After successfully cloning (```git clone https://github.com/Creative-Difficulty/EucoAPI/ ```) this repository, you can use 
- ```bash
+ After successfully cloning (```git clone https://github.com/Creative-Difficulty/EucoAPI/```) this repository, first run ```bash cd EucoAPI```.
+ Run ```bash
  docker build . -t creative-difficulty/eucoapi_1
  ```
- to build a container (this might take a while). To verify that you have installed the image successfully, run ```docker images```. You should see ```creative-difficulty/eucoapi_1``` in the list.
-Now run 
+ to build the container (this might take a while). To verify that you have installed the image successfully, run ```docker images```. You should see ```creative-difficulty/eucoapi_1``` in the list.
+Now type 
  ```bash
-docker run -p 49160:8082 -d creative-difficulty/eucoapi_1
+docker run -p 8081:8082 -d creative-difficulty/eucoapi_1
  ```
  to run the container.
- You can replace ```8082``` with the physical port you want EucoAPI running at.
+ Replace ```8082``` with the physical port you want EucoAPI running at and ```8081``` with the virtual port (in the container).
+ Your command should be formatted like this: 
+ ```bash docker run -p <VIRTUAL PORT>:<PHYSICAL PORT> -d creative-difficulty/eucoapi_1```
+ 
  to view the console output of EucoAPI, first get its CONTAINER ID (```docker ps```).
  Then run ```docker logs <CONTAINER ID>```. 
  
