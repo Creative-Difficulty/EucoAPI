@@ -1,4 +1,4 @@
-
+//@TODO header authentication for req-counter
 import express from "express"
 var app = express();
 
@@ -45,12 +45,11 @@ if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
     process.env.PORT = 8082
 }
 
+await si.networkStats()
 
 var ReqCounter = 0;
 
 app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
-    ReqCounter++;
-    var msTakenforTest = fib(30)
     if(process.env.MODE === "debug") {
         console.log("REQUEST:")
 
@@ -81,6 +80,11 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             }
         }
     }
+    if(req.header("EucoAPIAuth") !== "IamRobot") {res.status(401).send("Error 401: Unauthorized"); return;}
+
+    ReqCounter++;
+
+    var msTakenforTest = fib(30)
 
     var isRaspi;
     var piTemp
@@ -92,36 +96,73 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
     }
 
     process2.exec('whoami',function (err,stdout,stderr) { username = stdout.replace(/[\n\t\r]/g,"")})
-    si.osInfo().then(osStats => {osVersion = osStats})
-    mem.info().then(freemem => {freeMemory = freemem})
-    drive.info().then(driveinfo => {diskInfo = driveinfo})
-    cpu.usage().then(usage => {Processorusage = usage})
-    var cpuCoresInfo = os.cpus()
-    var cpuCoresInfo = cpuCoresInfo[1]
-    var data;
-    var today = new Date();
-    var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    var lel;
+    si.get({
+        osInfo: "*",
+        system: "*",
+        shell: "*",
 
-    data = {
-        "success" : true,
-        "time" : time,
-        "cpu_usage" : Processorusage,
-        "cpu_core_count" : cpu.count(),
-        "logged_in_user" : username,
-        "RAM" : freeMemory,
-        "cpu_type" : cpuCoresInfo,
-        "storage_info" : diskInfo,
-        "os_version" : osVersion,
-        "performance_test": msTakenforTest,
-        "Raspi": {
-            "is_pi": isRaspi,
-            "cpu_temp": piTemp,
-            "cpu_voltage": piVoltage
-        },
+        audio: "*",
 
-    }
+        baseboard: "*",
+        chassis: "*",
 
-    if(isPi()) {
+        cpu: "*",
+        //cpuFlags: "*",
+        cpuCache: "*", //in bytes
+        cpuCurrentSpeed: "*",
+        cpuTemperature: "*",
+
+        mem: "*", //in bytes
+        memLayout: "*", //in bytes
+
+        battery: "*",
+
+        graphics: "*",
+        versions: "*",
+        users: "*",
+        FullLoad: "*", //highest CPU % since boot
+
+        processes: "all, running, sleeping, unknown, blocked",
+        
+        //processLoad("process_name, process_name2"): "*", See: https://systeminformation.io/processes.html
+        services: "*",
+
+        diskLayout: "*",
+        fsOpenFiles: "*",
+        fsStats: "*", //See: https://systeminformation.io/filesystem.html
+
+        usb: "*",
+        printer: "*",
+
+        //networkInterfaces: "*",
+        networkInterfaceDefault: "*",
+        networkGatewayDefault: "*",  //router ip: 10.0.0.138
+        networkStats: "*", //si.networkStats(iface) iface= interface to scan
+        //networkConnections: "*",
+        //inetLatency: "*", inetLatency(google.com)
+
+        wifiNetworks: "*",
+        wifiInterfaces: "*",
+        wifiConnections: "*",
+
+        bluetoothDevices: "*",
+
+        dockerAll: "*",
+        vboxInfo: "*",
+    }).then(data => {lel = data; SendResponse();});
+
+    function SendResponse() {
+        si.osInfo().then(osStats => {osVersion = osStats})
+        mem.info().then(freemem => {freeMemory = freemem})
+        drive.info().then(driveinfo => {diskInfo = driveinfo})
+        cpu.usage().then(usage => {Processorusage = usage})
+        var cpuCoresInfo = os.cpus()
+        var cpuCoresInfo = cpuCoresInfo[1]
+        var data;
+        var today = new Date();
+        var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+    
         data = {
             "success" : true,
             "time" : time,
@@ -137,21 +178,44 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
                 "is_pi": isRaspi,
                 "cpu_temp": piTemp,
                 "cpu_voltage": piVoltage
+            },
+            lel
+    
+        }
+    
+        if(isPi()) {
+            data = {
+                "success" : true,
+                "time" : time,
+                "cpu_usage" : Processorusage,
+                "cpu_core_count" : cpu.count(),
+                "logged_in_user" : username,
+                "RAM" : freeMemory,
+                "cpu_type" : cpuCoresInfo,
+                "storage_info" : diskInfo,
+                "os_version" : osVersion,
+                "performance_test": msTakenforTest,
+                "Raspi": {
+                    "is_pi": isRaspi,
+                    "cpu_temp": piTemp,
+                    "cpu_voltage": piVoltage
+                },
+                lel
+    
             }
-
         }
-    }
-
-
-    try {
-        res.send(data)
-        console.log("Request made, content served successfully")
-        console.log("content served successfully")
-        if(process.env.MODE === "debug") {
-            console.log("")
+    
+    
+        try {
+            res.send(data)
+            console.log("Request made, content served successfully")
+            console.log("content served successfully")
+            if(process.env.MODE === "debug") {
+                console.log("")
+            }
+        } catch(err) {
+           console.log("An error occurred while responding to an API request: ", err)
         }
-    } catch(err) {
-       console.log("An error occurred while responding to an API request: ", err)
     }
 })
 
