@@ -108,6 +108,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             osInfo: "*",
             system: "*",
             shell: "*",
+            bios: "*",
 
             audio: "*",
 
