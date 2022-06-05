@@ -15,18 +15,12 @@ import si from "systeminformation"
 import dotenv from 'dotenv'
 dotenv.config()
 
-import os from "os"
 import ip from "ip"
 import fetch from "node-fetch"
 
 import isPi from "detect-rpi"
 
-var diskInfo
 var Processorusage
-var freeMemory
-var osVersion
-var username;
-
 
 console.log("Welcome to EucoAPIv0.1")
 
@@ -92,7 +86,6 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
 
     
     if(ReqCounter === 1) {
-
         var msTakenforTest = fib(30)
 
         var piTemp
@@ -204,7 +197,102 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             console.log("An error occurred while responding to an API request: ", err)
             }
         });
-    } else res.send("wip")
+    } else {
+        var msTakenforTest = fib(30)
+
+        var piTemp
+        var piVoltage;
+
+        if(isPi()) {
+            process2.exec("vcgencmd measure_temp", function (err,stdout,stderr) {stdout.split("="); var stdout1 = stdout[1].split("'"); piTemp = stdout1[0]})
+            process2.exec("vcgencmd measure_volts", function (err,stdout,stderr) {stdout.split("="); piVoltage = stdout[1].replace("V", "")})
+        }
+
+
+        si.get({
+            cpu: "*",
+            //cpuFlags: "*",
+            cpuCache: "*", //in bytes
+            cpuCurrentSpeed: "*",
+            cpuTemperature: "*",
+
+            mem: "*", //in bytes
+            memLayout: "*", //in bytes
+
+            battery: "*",
+
+            FullLoad: "*", //highest CPU % since boot
+
+            processes: "all, running, sleeping, unknown, blocked",
+            
+            //processLoad("process_name, process_name2"): "*", See: https://systeminformation.io/processes.html
+            services: "*",
+
+            //diskLayout: "*",
+            fsOpenFiles: "*",
+            fsStats: "*", //See: https://systeminformation.io/filesystem.html
+            fsSize: "*",
+
+            usb: "*",
+            
+            networkStats: "*", //si.networkStats(iface) iface= interface to scan
+            //networkConnections: "*",
+            //inetLatency: "*", inetLatency(google.com)
+
+            wifiNetworks: "*",
+            wifiInterfaces: "*",
+            wifiConnections: "*",
+
+            bluetoothDevices: "*",
+
+            dockerInfo: "containers, containersRunning, containersPaused, containersStopped, images, memoryLimit, operatingSystem, memTotal, experimentalBuild, serverVersion",
+            dockerContainers: "*",
+            // dockerImages: "*",
+            //dockerContainerStats: "*",
+
+            vboxInfo: "*",
+        }).then(SIdata => {
+            cpu.usage().then(usage => {Processorusage = usage})
+            var today = new Date();
+            var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+            var data;
+        
+            data = {
+                "success" : true,
+                "time": time,
+                "cpu_usage": Processorusage,
+                "performance_test": msTakenforTest,
+                SIdata
+            }
+        
+            if(isPi()) {
+                data = {
+                    "success" : true,
+                    "time" : time,
+                    "cpu_usage": Processorusage,
+                    "performance_test": msTakenforTest,
+                    "Raspi": {
+                        "is_pi": isPi(),
+                        "cpu_temp": piTemp,
+                        "cpu_voltage": piVoltage
+                    },
+                    SIdata
+                }
+            }
+        
+        
+            try {
+                res.send(data)
+                console.log("Request made, content served successfully")
+                console.log("content served successfully")
+                if(process.env.MODE === "debug") {
+                    console.log("")
+                }
+            } catch(err) {
+            console.log("An error occurred while responding to an API request: ", err)
+            }
+        });
+    }
     ReqCounter++;
 })
 
