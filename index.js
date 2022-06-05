@@ -212,7 +212,7 @@ app.listen(process.env.PORT, function () {
    console.log("API operating at http://localhost:" + process.env.PORT + "/" + process.env.PATH_AFTER_URL)
 })
 
-await fetch("http://localhost:" + process.env.PORT + "/" + process.env.PATH_AFTER_URL, {
+fetch("http://localhost:" + process.env.PORT + "/" + process.env.PATH_AFTER_URL, {
     headers: {
         "EucoAPIAuth": "IamRobot"
     }
