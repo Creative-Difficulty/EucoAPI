@@ -20,7 +20,10 @@ import fetch from "node-fetch"
 
 import isPi from "detect-rpi"
 
-var Processorusage
+import find from 'local-devices'
+
+var Processorusage;
+var DevicesInNetwork;
 
 console.log("Welcome to EucoAPIv0.1")
 
@@ -157,7 +160,8 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
 
             vboxInfo: "*",
         }).then(SIdata => {
-            cpu.usage().then(usage => {Processorusage = usage})
+            cpu.usage().then(data => {Processorusage = data})
+            find().then(data => {DevicesInNetwork = data})
             var today = new Date();
             var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
             var data;
@@ -167,15 +171,17 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
                 "time": time,
                 "cpu_usage": Processorusage,
                 "performance_test": msTakenforTest,
+                "dism": DevicesInNetwork,
                 SIdata
             }
         
             if(isPi()) {
                 data = {
                     "success" : true,
-                    "time" : time,
+                    "time": time,
                     "cpu_usage": Processorusage,
                     "performance_test": msTakenforTest,
+                    "dism": DevicesInNetwork,
                     "Raspi": {
                         "is_pi": isPi(),
                         "cpu_temp": piTemp,
@@ -239,8 +245,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             //networkConnections: "*",
             //inetLatency: "*", inetLatency(google.com)
 
-            wifiNetworks: "*",
-            wifiInterfaces: "*",
+
             wifiConnections: "*",
 
             bluetoothDevices: "*",
@@ -252,6 +257,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
 
             vboxInfo: "*",
         }).then(SIdata => {
+            find().then(data => {DevicesInNetwork = data})
             cpu.usage().then(usage => {Processorusage = usage})
             var today = new Date();
             var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
@@ -262,6 +268,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
                 "time": time,
                 "cpu_usage": Processorusage,
                 "performance_test": msTakenforTest,
+                "dism": DevicesInNetwork,
                 SIdata
             }
         
