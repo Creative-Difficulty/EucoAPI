@@ -87,7 +87,6 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         return;
     }   
 
-    
     if(ReqCounter === 1) {
         var msTakenforTest = fib(30)
 
@@ -304,6 +303,5 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
 })
 
 app.listen(process.env.PORT, function () {
-
    console.log("API operating at http://localhost:" + process.env.PORT + "/" + process.env.PATH_AFTER_URL)
 })
