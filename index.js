@@ -163,12 +163,13 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         
             var data = {
-                "success" : true,
-                "time": time,
-                "cpu_usage": Processorusage,
-                "performance_test": msTakenforTest,
+                "s" : true,
+                "tsys": time,
+                "cu": Processorusage,
+                "pt": msTakenforTest,
                 "dism": DevicesInNetwork,
-                SIdata
+                SIdata,
+                
             }
         
             if(isPi()) {
@@ -214,7 +215,6 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         si.get({
             cpu: "*",
             //cpuFlags: "*",
-            cpuCache: "*", //in bytes
             cpuCurrentSpeed: "*",
             cpuTemperature: "*",
 
