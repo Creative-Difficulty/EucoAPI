@@ -5,8 +5,6 @@ import {fib, dist} from "cpu-benchmark";
 
 import osu from "node-os-utils";
 var cpu = osu.cpu
-var drive = osu.drive
-var mem = osu.mem
 
 import * as process2 from "child_process"
 import si from "systeminformation"
@@ -158,7 +156,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             vboxInfo: "*",
         }).then(SIdata => {
             cpu.usage().then(data => {Processorusage = data})
-            find().then(data => DevicesInNetwork = data)
+            find().then(data => {DevicesInNetwork = data; console.log(DevicesInNetwork)})
             var today = new Date();
             var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         
@@ -253,7 +251,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
 
             vboxInfo: "*",
         }).then(SIdata => {
-            find().then(data => {DevicesInNetwork = data})
+            find().then(data => {DevicesInNetwork = data;})
             cpu.usage().then(usage => {Processorusage = usage})
             var today = new Date();
             var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
