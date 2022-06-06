@@ -43,7 +43,6 @@ if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
 }
 
 await si.networkStats()
-find();
 var ReqCounter = 0;
 
 app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
@@ -160,7 +159,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             vboxInfo: "*",
         }).then(SIdata => {
             cpu.usage().then(data => {Processorusage = data})
-            find().then(data => {DevicesInNetwork = data})
+            find().then(data => DevicesInNetwork = data)
             var today = new Date();
             var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
         
