@@ -43,7 +43,7 @@ if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
 }
 
 await si.networkStats()
-
+find();
 var ReqCounter = 0;
 
 app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
@@ -87,7 +87,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         return;
     }   
 
-    if(ReqCounter === 1) {
+    if(ReqCounter === 0) {
         var msTakenforTest = fib(30)
 
         var piTemp
@@ -163,9 +163,8 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             find().then(data => {DevicesInNetwork = data})
             var today = new Date();
             var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-            var data;
         
-            data = {
+            var data = {
                 "success" : true,
                 "time": time,
                 "cpu_usage": Processorusage,
