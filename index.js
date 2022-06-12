@@ -19,6 +19,8 @@ import isPi from "detect-rpi"
 
 import find from 'local-devices'
 
+import protobuf from 'protobufjs';
+
 var Processorusage;
 var DevicesInNetwork;
 
@@ -172,15 +174,15 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         
             if(isPi()) {
                 data = {
-                    "success" : true,
-                    "time": time,
-                    "cpu_usage": Processorusage,
-                    "performance_test": msTakenforTest,
-                    "dism": DevicesInNetwork,
-                    "Raspi": {
-                        "is_pi": isPi(),
-                        "cpu_temp": piTemp,
-                        "cpu_voltage": piVoltage
+                    "s" : true,
+                    "t": time,
+                    "cu": Processorusage,
+                    "pt": msTakenforTest,
+                    "d": DevicesInNetwork,
+                    "r": {
+                        "ip": isPi(),
+                        "t": piTemp,
+                        "cv": piVoltage
                     },
                     SIdata
                 }
@@ -188,7 +190,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         
         
             try {
-                res.send(data)
+                res.send(Buffer.from(JSON.stringify(data)).toString("base64"))
                 console.log("Request made, content served successfully")
                 console.log("content served successfully")
                 if(process.env.MODE === "debug") {
@@ -258,11 +260,11 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             var data;
         
             data = {
-                "success" : true,
-                "time": time,
-                "cpu_usage": Processorusage,
-                "performance_test": msTakenforTest,
-                "dism": DevicesInNetwork,
+                "s" : true,
+                "t": time,
+                "cu": Processorusage,
+                "pt": msTakenforTest,
+                "d": DevicesInNetwork,
                 SIdata
             }
         
@@ -283,14 +285,14 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         
         
             try {
-                res.send(data)
+                res.send(Buffer.from(JSON.stringify(data)).toString("base64"))
                 console.log("Request made, content served successfully")
                 console.log("content served successfully")
                 if(process.env.MODE === "debug") {
                     console.log("")
                 }
             } catch(err) {
-            console.log("An error occurred while responding to an API request: ", err)
+                console.log("An error occurred while responding to an API request: ", err)
             }
         });
     }
