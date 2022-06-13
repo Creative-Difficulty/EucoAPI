@@ -1,25 +1,48 @@
-import express from "express"
+import express from "express";
 var app = express();
 
 import {fib, dist} from "cpu-benchmark";
 
 import osu from "node-os-utils";
-var cpu = osu.cpu
+var cpu = osu.cpu;
 
-import * as process2 from "child_process"
-import si from "systeminformation"
+import * as process2 from "child_process";
+import si from "systeminformation";
 
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
 dotenv.config()
 
-import ip from "ip"
-import fetch from "node-fetch"
+import ip from "ip";
+import fetch from "node-fetch";
 
-import isPi from "detect-rpi"
+import isPi from "detect-rpi";
 
-import find from 'local-devices'
+import find from 'local-devices';
 
-import protobuf from 'protobufjs';
+import log4js from 'log4js';
+
+import path from 'path';
+
+const __dirname = path.resolve();
+const logger = log4js.getLogger();
+
+function initLogger() {
+    var currentDate = new Date();
+    var LogName = currentDate.getDate() + "." +  (parseInt(currentDate.getMonth()) + 1)
+    + "." + currentDate.getFullYear() + "@"  
+    + currentDate.getHours() + ":"  
+    + currentDate.getMinutes() + ":" + currentDate.getSeconds();
+    
+    log4js.configure({
+        appenders: {
+            fileAppender: { type: 'file', filename: path.join(__dirname, "logs",  LogName + ".log")},
+            console: { type: 'console' }
+        },
+        categories: {
+            default: { appenders: ['fileAppender', 'console'], level: 'error' }
+        }
+    });
+}
 
 var Processorusage;
 var DevicesInNetwork;
@@ -31,9 +54,11 @@ if(/\s/.test(process.env.PATH_AFTER_URL)) {
     process.env.PATH_AFTER_URL = ""
 }
 
-if(process.env.MODE === ""|| /\s/.test(process.env.MODE)) {
-    console.log("The environment variable MODE isnt set or isnt properly set, defaulting to normal")
-    process.env.MODE = "normal"
+if(process.env.MODE === "" || /\s/.test(process.env.MODE) || process.env.MODE !== "normal" || process.env.MODE !== "production" || process.env.MODE !== "debug") {
+    console.log("The environment variable MODE isnt set or isnt properly set, defaulting to normal");
+    logger.level = "info";
+} else {
+    logger.level = process.env.MODE;
 }
 
 if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
