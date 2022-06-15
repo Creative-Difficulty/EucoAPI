@@ -22,9 +22,16 @@ import find from 'local-devices';
 import log4js from 'log4js';
 
 import path from 'path';
+import crypto from 'crypto';
+
+import xml2js from 'xml2js';
+
+import fs from 'fs';
 
 const __dirname = path.resolve();
 const logger = log4js.getLogger();
+
+app.use(express.json())
 
 function initLogger() {
     var currentDate = new Date();
@@ -44,13 +51,15 @@ function initLogger() {
     });
 }
 
+initLogger();
+
 var Processorusage;
 var DevicesInNetwork;
 
 console.log("Welcome to EucoAPIv0.1")
 
 if(/\s/.test(process.env.PATH_AFTER_URL)) {
-    console.log("The environment variable PATH_AFTER_URL contains a whitespace, defaulting to none")
+    console.log("The environment variable PATH_AFTER_URL contains a whitespace, defaulting to none");
     process.env.PATH_AFTER_URL = ""
 }
 
@@ -68,6 +77,56 @@ if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
 
 await si.networkStats()
 var ReqCounter = 0;
+
+app.get("/auth", function (req, res) {
+    const token = crypto.randomBytes(48).toString('hex');
+    fs.readFile("users.xml", "utf-8", (err, data) => {
+        if (err) {
+            throw err;
+        }
+    
+        // convert XML data to JSON object
+        xml2js.parseString(data, (err, result) => {
+            if (err) throw err;
+
+            console.log(JSON.stringify(result, null, 4));
+            var IP = req.ip;
+
+            if(req.ip === undefined || req.ip === null) {
+                throw new Error("Request IP cannot be resolved, to avoid a possbile DDoS attack, this request will not be handeled");
+            } else if(req.ip === "::1" || req.ip === "127.0.0.1") {
+                IP = "localhost"
+            }
+
+            const newUser = {
+                "has-access": false,
+                "request-ip": IP,
+                "token": token
+            }
+
+            result["users"].push({ user: newUser});
+
+            const builder = new xml2js.Builder();
+            const xml = builder.buildObject(result);
+
+            fs.writeFile('users.xml', xml, (err) => {
+                if (err) {
+                    throw err;
+                }
+    
+                console.log(`Updated XML is written to a new file.`);
+            });
+
+    
+        });
+
+
+    });
+
+    res.send({
+        "token": token
+    })
+})
 
 app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
     if(process.env.MODE === "debug") {
