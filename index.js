@@ -21,15 +21,9 @@ dotenv.config()
 const __dirname = path.resolve();
 const logger = log4js.getLogger();
 
-app.use(express.json())
-
 function initLogger() {
     var currentDate = new Date();
-    var LogName = currentDate.getDate() + "." +  (parseInt(currentDate.getMonth()) + 1)
-    + "." + currentDate.getFullYear() + "@"  
-    + currentDate.getHours() + ":"  
-    + currentDate.getMinutes() + ":" + currentDate.getSeconds();
-    
+    var LogName = currentDate.getDate() + "." +  (parseInt(currentDate.getMonth()) + 1) + "." + currentDate.getFullYear() + "@" + currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds();
     log4js.configure({
         appenders: {
             fileAppender: { type: 'file', filename: path.join(__dirname, "logs",  LogName + ".log")},
@@ -41,30 +35,36 @@ function initLogger() {
     });
 }
 
+function checkENV() {
+    if(/\s/.test(process.env.PATH_AFTER_URL)) {
+        console.log("The environment variable PATH_AFTER_URL contains a whitespace, defaulting to none");
+        process.env.PATH_AFTER_URL = ""
+    }
+    
+    if(process.env.MODE === "" || /\s/.test(process.env.MODE) || process.env.MODE !== "normal" || process.env.MODE !== "production" || process.env.MODE !== "debug") {
+        console.log("The environment variable MODE isnt set or isnt properly set, defaulting to normal");
+        logger.level = "info";
+    } else {
+        logger.level = process.env.MODE;
+    }
+    
+    if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
+        console.log("The environment variable PORT isnt set or isnt properly set, defaulting to 8082")
+        process.env.PORT = 8082
+    }
+}
+
+checkENV();
 initLogger();
+
 
 var Processorusage;
 var DevicesInNetwork;
 
 console.log("Welcome to EucoAPIv0.1")
 
-if(/\s/.test(process.env.PATH_AFTER_URL)) {
-    console.log("The environment variable PATH_AFTER_URL contains a whitespace, defaulting to none");
-    process.env.PATH_AFTER_URL = ""
-}
 
-if(process.env.MODE === "" || /\s/.test(process.env.MODE) || process.env.MODE !== "normal" || process.env.MODE !== "production" || process.env.MODE !== "debug") {
-    console.log("The environment variable MODE isnt set or isnt properly set, defaulting to normal");
-    logger.level = "info";
-} else {
-    logger.level = process.env.MODE;
-}
-
-if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
-    console.log("The environment variable PORT isnt set or isnt properly set, defaulting to 8082")
-    process.env.PORT = 8082
-}
-
+app.use(express.json())
 await si.networkStats()
 var ReqCounter = 0;
 
