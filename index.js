@@ -1,32 +1,22 @@
-import express from "express";
-var app = express();
-
-import {fib, dist} from "cpu-benchmark";
-
-import osu from "node-os-utils";
-var cpu = osu.cpu;
-
 import * as process2 from "child_process";
+
+import {dist, fib} from "cpu-benchmark";
+
+import crypto from 'crypto';
+import dotenv from 'dotenv';
+import express from "express";
+import fetch from "node-fetch";
+import find from 'local-devices';
+import fs from 'fs';
+import ip from "ip";
+import isPi from "detect-rpi";
+import log4js from 'log4js';
+import osu from "node-os-utils";
+import path from 'path';
 import si from "systeminformation";
 
-import dotenv from 'dotenv';
+var app = express();
 dotenv.config()
-
-import ip from "ip";
-import fetch from "node-fetch";
-
-import isPi from "detect-rpi";
-
-import find from 'local-devices';
-
-import log4js from 'log4js';
-
-import path from 'path';
-import crypto from 'crypto';
-
-import xml2js from 'xml2js';
-
-import fs from 'fs';
 
 const __dirname = path.resolve();
 const logger = log4js.getLogger();
@@ -80,49 +70,28 @@ var ReqCounter = 0;
 
 app.get("/auth", function (req, res) {
     const token = crypto.randomBytes(48).toString('hex');
-    fs.readFile("users.xml", "utf-8", (err, data) => {
-        if (err) {
-            throw err;
+    fs.readFile("users.json", "utf-8", (err, data) => {
+        if (err) throw err;
+
+        if(!data.includes("[]") || data === "" || data === null || data === undefined) fs.writeFile("users.json", "[]", (data, err) => {if (err) throw err;});
+        var parsedData = JSON.parse(data);
+        var IP = req.ip;
+        if(req.ip === undefined || req.ip === null) {
+            throw new Error("Request IP cannot be resolved, to avoid a possbile DDoS attack, this request will not be handeled");
+        } else if(req.ip === "::1" || req.ip === "127.0.0.1") {
+            IP = "localhost"
         }
-    
-        // convert XML data to JSON object
-        xml2js.parseString(data, (err, result) => {
-            if (err) throw err;
 
-            console.log(JSON.stringify(result, null, 4));
-            var IP = req.ip;
+        const newUser = {
+            "has-access": false,
+            "request-ip": IP,
+            "token": token
+        }
 
-            if(req.ip === undefined || req.ip === null) {
-                throw new Error("Request IP cannot be resolved, to avoid a possbile DDoS attack, this request will not be handeled");
-            } else if(req.ip === "::1" || req.ip === "127.0.0.1") {
-                IP = "localhost"
-            }
-
-            const newUser = {
-                "has-access": false,
-                "request-ip": IP,
-                "token": token
-            }
-
-            result["users"].push({ user: newUser});
-
-            const builder = new xml2js.Builder();
-            const xml = builder.buildObject(result);
-
-            fs.writeFile('users.xml', xml, (err) => {
-                if (err) {
-                    throw err;
-                }
-    
-                console.log(`Updated XML is written to a new file.`);
-            });
-
-    
-        });
-
-
+        parsedData.push(newUser);
+        fs.writeFile("users.json", JSON.stringify(parsedData), (data, err) => {if (err) throw err;});
     });
-
+    
     res.send({
         "token": token
     })
@@ -241,7 +210,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
 
             vboxInfo: "*",
         }).then(SIdata => {
-            cpu.usage().then(data => {Processorusage = data})
+            osu.cpu.usage().then(data => {Processorusage = data})
             find().then(data => {DevicesInNetwork = data; console.log(DevicesInNetwork)})
             var today = new Date();
             var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
@@ -338,7 +307,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             vboxInfo: "*",
         }).then(SIdata => {
             find().then(data => {DevicesInNetwork = data;})
-            cpu.usage().then(usage => {Processorusage = usage})
+            osu.cpu.usage().then(usage => {Processorusage = usage})
             var today = new Date();
             var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
             var data;
