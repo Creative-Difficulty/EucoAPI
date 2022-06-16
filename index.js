@@ -68,12 +68,14 @@ app.use(express.json())
 await si.networkStats()
 var ReqCounter = 0;
 
+fs.readFile("users.json", "utf-8", (err, data) => {if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) {fs.writeFile("users.json", "[]", (data, err) => {if (err) throw err;})};})
+
 app.get("/auth", function (req, res) {
     const token = crypto.randomBytes(48).toString('hex');
     fs.readFile("users.json", "utf-8", (err, data) => {
         if (err) throw err;
 
-        if(!data.includes("[]") || data === "" || data === null || data === undefined) fs.writeFile("users.json", "[]", (data, err) => {if (err) throw err;});
+        if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) throw new Error("Something went wrong");
         var parsedData = JSON.parse(data);
         var IP = req.ip;
         if(req.ip === undefined || req.ip === null) {
