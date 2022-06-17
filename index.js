@@ -130,16 +130,8 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             }
         }
     }
-    if(req.header("EucoAPIAuth") !== "IamRobot") {
-        res.status(401).send({
-            "success": false,
-            "Error": "Unauthorized",
-            "ErrorCode": "401",
-            "ErrorMessage": "Invalid Headers" 
-        }); 
-        return;
-    }   
-
+    
+    req.header("Authentication", "Basic")
     if(ReqCounter === 0) {
         var msTakenforTest = fib(30)
 
