@@ -1,46 +1,103 @@
-import express from "express"
-var app = express();
+import * as process2 from "child_process";
 
-import {fib, dist} from "cpu-benchmark";
+import {dist, fib} from "cpu-benchmark";
 
+import crypto from 'crypto';
+import dotenv from 'dotenv';
+import express from "express";
+import fetch from "node-fetch";
+import find from 'local-devices';
+import fs from 'fs';
+import ip from "ip";
+import isPi from "detect-rpi";
+import log4js from 'log4js';
 import osu from "node-os-utils";
-var cpu = osu.cpu
+import path from 'path';
+import si from "systeminformation";
 
-import * as process2 from "child_process"
-import si from "systeminformation"
-
-import dotenv from 'dotenv'
+var app = express();
 dotenv.config()
 
-import ip from "ip"
-import fetch from "node-fetch"
+const __dirname = path.resolve();
+const logger = log4js.getLogger();
 
-import isPi from "detect-rpi"
+function initLogger() {
+    var currentDate = new Date();
+    var LogName = currentDate.getDate() + "." +  (parseInt(currentDate.getMonth()) + 1) + "." + currentDate.getFullYear() + "@" + currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds();
+    log4js.configure({
+        appenders: {
+            fileAppender: { type: 'file', filename: path.join(__dirname, "logs",  LogName + ".log")},
+            console: { type: 'console' }
+        },
+        categories: {
+            default: { appenders: ['fileAppender', 'console'], level: 'error' }
+        }
+    });
+}
 
-import find from 'local-devices'
+function checkENV() {
+    if(/\s/.test(process.env.PATH_AFTER_URL)) {
+        console.log("The environment variable PATH_AFTER_URL contains a whitespace, defaulting to none");
+        process.env.PATH_AFTER_URL = ""
+    }
+    
+    if(process.env.MODE === "" || /\s/.test(process.env.MODE) || process.env.MODE !== "normal" || process.env.MODE !== "production" || process.env.MODE !== "debug") {
+        console.log("The environment variable MODE isnt set or isnt properly set, defaulting to normal");
+        logger.level = "info";
+    } else {
+        logger.level = process.env.MODE;
+    }
+    
+    if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
+        console.log("The environment variable PORT isnt set or isnt properly set, defaulting to 8082")
+        process.env.PORT = 8082
+    }
+}
+
+checkENV();
+initLogger();
+
 
 var Processorusage;
 var DevicesInNetwork;
 
 console.log("Welcome to EucoAPIv0.1")
 
-if(/\s/.test(process.env.PATH_AFTER_URL)) {
-    console.log("The environment variable PATH_AFTER_URL contains a whitespace, defaulting to none")
-    process.env.PATH_AFTER_URL = ""
-}
 
-if(process.env.MODE === ""|| /\s/.test(process.env.MODE)) {
-    console.log("The environment variable MODE isnt set or isnt properly set, defaulting to normal")
-    process.env.MODE = "normal"
-}
-
-if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
-    console.log("The environment variable PORT isnt set or isnt properly set, defaulting to 8082")
-    process.env.PORT = 8082
-}
-
+app.use(express.json())
 await si.networkStats()
 var ReqCounter = 0;
+
+fs.readFile("users.json", "utf-8", (err, data) => {if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) {fs.writeFile("users.json", "[]", (data, err) => {if (err) throw err;})};})
+
+app.get("/auth", function (req, res) {
+    const token = crypto.randomBytes(48).toString('hex');
+    fs.readFile("users.json", "utf-8", (err, data) => {
+        if (err) throw err;
+
+        if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) throw new Error("Something went wrong");
+        var parsedData = JSON.parse(data);
+        var IP = req.ip;
+        if(req.ip === undefined || req.ip === null) {
+            throw new Error("Request IP cannot be resolved, to avoid a possbile DDoS attack, this request will not be handeled");
+        } else if(req.ip === "::1" || req.ip === "127.0.0.1") {
+            IP = "localhost"
+        }
+
+        const newUser = {
+            "has-access": false,
+            "request-ip": IP,
+            "token": token
+        }
+
+        parsedData.push(newUser);
+        fs.writeFile("users.json", JSON.stringify(parsedData), (data, err) => {if (err) throw err;});
+    });
+    
+    res.send({
+        "token": token
+    })
+})
 
 app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
     if(process.env.MODE === "debug") {
@@ -155,7 +212,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
 
             vboxInfo: "*",
         }).then(SIdata => {
-            cpu.usage().then(data => {Processorusage = data})
+            osu.cpu.usage().then(data => {Processorusage = data})
             find().then(data => {DevicesInNetwork = data; console.log(DevicesInNetwork)})
             var today = new Date();
             var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
@@ -172,15 +229,15 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         
             if(isPi()) {
                 data = {
-                    "success" : true,
-                    "time": time,
-                    "cpu_usage": Processorusage,
-                    "performance_test": msTakenforTest,
-                    "dism": DevicesInNetwork,
-                    "Raspi": {
-                        "is_pi": isPi(),
-                        "cpu_temp": piTemp,
-                        "cpu_voltage": piVoltage
+                    "s" : true,
+                    "t": time,
+                    "cu": Processorusage,
+                    "pt": msTakenforTest,
+                    "d": DevicesInNetwork,
+                    "r": {
+                        "ip": isPi(),
+                        "t": piTemp,
+                        "cv": piVoltage
                     },
                     SIdata
                 }
@@ -188,7 +245,7 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         
         
             try {
-                res.send(data)
+                res.send(Buffer.from(JSON.stringify(data)).toString("base64"))
                 console.log("Request made, content served successfully")
                 console.log("content served successfully")
                 if(process.env.MODE === "debug") {
@@ -252,17 +309,17 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
             vboxInfo: "*",
         }).then(SIdata => {
             find().then(data => {DevicesInNetwork = data;})
-            cpu.usage().then(usage => {Processorusage = usage})
+            osu.cpu.usage().then(usage => {Processorusage = usage})
             var today = new Date();
             var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
             var data;
         
             data = {
-                "success" : true,
-                "time": time,
-                "cpu_usage": Processorusage,
-                "performance_test": msTakenforTest,
-                "dism": DevicesInNetwork,
+                "s" : true,
+                "t": time,
+                "cu": Processorusage,
+                "pt": msTakenforTest,
+                "d": DevicesInNetwork,
                 SIdata
             }
         
@@ -283,14 +340,14 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         
         
             try {
-                res.send(data)
+                res.send(Buffer.from(JSON.stringify(data)).toString("base64"))
                 console.log("Request made, content served successfully")
                 console.log("content served successfully")
                 if(process.env.MODE === "debug") {
                     console.log("")
                 }
             } catch(err) {
-            console.log("An error occurred while responding to an API request: ", err)
+                console.log("An error occurred while responding to an API request: ", err)
             }
         });
     }

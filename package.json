@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon index.js"
+    "start": "nodemon --ignore users.json index.js"
   },
   "keywords": [
     "api",
@@ -24,9 +24,11 @@
     "express": "^4.17.2",
     "fs": "^0.0.1-security",
     "geoip-lite": "^1.4.2",
+    "inquirer": "^8.2.4",
     "ip": "^1.1.5",
     "json": "^11.0.0",
     "local-devices": "^3.0.0",
+    "log4js": "^6.5.2",
     "node-fetch": "^3.2.5",
     "node-os-utils": "^1.3.6",
     "nodemon": "^2.0.16",
