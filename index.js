@@ -8,6 +8,7 @@ import express from "express";
 import fetch from "node-fetch";
 import find from 'local-devices';
 import fs from 'fs';
+import inquirer from "inquirer";
 import ip from "ip";
 import isPi from "detect-rpi";
 import log4js from 'log4js';
@@ -68,8 +69,24 @@ app.use(express.json())
 await si.networkStats()
 var ReqCounter = 0;
 
-fs.readFile("users.json", "utf-8", (err, data) => {if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) {fs.writeFile("users.json", "[]", (data, err) => {if (err) throw err;})};})
-
+fs.readFile("users.json", "utf-8", (err, data) => {
+    if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) {
+        inquirer.prompt([{
+            type: "confirm",
+            name: "clearUsersFile",
+            message: "Error reading users file, File is empty or corrupted. Do you want to clear its contents, or can you fix it?",
+        }]).then( answer => {
+            if(answer.clearUsersFile === true) {
+                fs.writeFile("users.json", "[]", (data, err) => {
+                    if (err) throw err;
+                })
+            } else {
+                console.log("Relaunch EucoAPI when you have fixed users.json!");
+            }
+        });
+        
+    };
+})
 app.get("/auth", function (req, res) {
     const token = crypto.randomBytes(48).toString('hex');
     fs.readFile("users.json", "utf-8", (err, data) => {
