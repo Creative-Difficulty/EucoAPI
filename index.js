@@ -4,6 +4,7 @@ import {dist, fib} from "cpu-benchmark";
 
 import crypto from 'crypto';
 import dotenv from 'dotenv';
+import { exit } from "process";
 import express from "express";
 import fetch from "node-fetch";
 import find from 'local-devices';
@@ -14,7 +15,9 @@ import isPi from "detect-rpi";
 import log4js from 'log4js';
 import osu from "node-os-utils";
 import path from 'path';
+import rateLimit from 'express-rate-limit'
 import si from "systeminformation";
+import slowDown from "express-slow-down"
 
 var app = express();
 dotenv.config()
@@ -55,8 +58,53 @@ function checkENV() {
     }
 }
 
+function checkUsersCorruption() {
+    fs.readFile("users.json", "utf-8", (err, data) => {
+        try {
+            data = JSON.parse(data);
+        } catch (e) {
+            inquirer.prompt([{
+                type: "confirm",
+                name: "clearUsersFile",
+                message: "Error reading users file, File is empty or corrupted. Do you want to clear its contents?",
+            }]).then( answer => {
+                if(answer.clearUsersFile === true) {
+                    fs.writeFile("users.json", "[]", (data, err) => {
+                        if (err) throw err;
+                    })
+                } else {
+                    console.log("Relaunch EucoAPI when you have fixed users.json!");
+                    exit(1);
+
+                }
+            });
+        }
+
+        /**@deprecated  */ 
+        // if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) {
+        //     inquirer.prompt([{
+        //         type: "confirm",
+        //         name: "clearUsersFile",
+        //         message: "Error reading users file, File is empty or corrupted. Do you want to clear its contents?",
+        //     }]).then( answer => {
+        //         if(answer.clearUsersFile === true) {
+        //             fs.writeFile("users.json", "[]", (data, err) => {
+        //                 if (err) throw err;
+        //             })
+        //         } else {
+        //             console.log("Relaunch EucoAPI when you have fixed users.json!");
+        //             exit(1);
+
+        //         }
+        //     });
+            
+        // };
+    })
+}
+
 checkENV();
 initLogger();
+checkUsersCorruption();
 
 
 var Processorusage;
@@ -65,28 +113,45 @@ var DevicesInNetwork;
 console.log("Welcome to EucoAPIv0.1")
 
 
+let allowedIPs = [];
+fs.readFile("users.json", "utf-8", (err, result) => {
+    result = JSON.parse(result); 
+    for (let i = 0; i < result.length; i++) {
+        for (var name in result[i]) {
+            console.log(result[i][name].ip);
+            if(result[i]["has-access"] === true) {
+                allowedIPs.push(result[i][name].ip);
+            }
+        }
+    }
+})
+
+
+console.log(allowedIPs)
+const speedLimiter = slowDown({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    delayAfter: 100, // allow 100 requests per minute, then...
+    delayMs: 500, // add delay to every request after 100 requests in 1 minute
+    //skip: ""
+});
+
+const apiLimiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    message: {"Error" : "Too many requests"},
+    //skip: ""
+});
+
+app.use(speedLimiter)
+app.use(apiLimiter)
+
 app.use(express.json())
 await si.networkStats()
 var ReqCounter = 0;
 
-fs.readFile("users.json", "utf-8", (err, data) => {
-    if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) {
-        inquirer.prompt([{
-            type: "confirm",
-            name: "clearUsersFile",
-            message: "Error reading users file, File is empty or corrupted. Do you want to clear its contents, or can you fix it?",
-        }]).then( answer => {
-            if(answer.clearUsersFile === true) {
-                fs.writeFile("users.json", "[]", (data, err) => {
-                    if (err) throw err;
-                })
-            } else {
-                console.log("Relaunch EucoAPI when you have fixed users.json!");
-            }
-        });
-        
-    };
-})
+
 app.get("/auth", function (req, res) {
     const token = crypto.randomBytes(48).toString('hex');
     fs.readFile("users.json", "utf-8", (err, data) => {
@@ -94,16 +159,10 @@ app.get("/auth", function (req, res) {
 
         if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) throw new Error("Something went wrong");
         var parsedData = JSON.parse(data);
-        var IP = req.ip;
-        if(req.ip === undefined || req.ip === null) {
-            throw new Error("Request IP cannot be resolved, to avoid a possbile DDoS attack, this request will not be handeled");
-        } else if(req.ip === "::1" || req.ip === "127.0.0.1") {
-            IP = "localhost"
-        }
 
         const newUser = {
             "has-access": false,
-            "request-ip": IP,
+            "ip": req.ip,
             "token": token
         }
 
