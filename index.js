@@ -54,20 +54,20 @@ function initLogger() {
 }
 
 function checkENV() {
-    if(/\s/.test(process.env.PATH_AFTER_URL)) {
-        console.log("The environment variable PATH_AFTER_URL contains a whitespace, defaulting to none");
-        process.env.PATH_AFTER_URL = ""
+    if(/\s/.test(process.env.URI)) {
+        logger.warn("The environment variable URI contains a whitespace, defaulting to none");
+        process.env.URI = ""
     }
     
-    if(process.env.MODE === "" || /\s/.test(process.env.MODE) || process.env.MODE !== "normal" || process.env.MODE !== "production" || process.env.MODE !== "debug") {
-        console.log("The environment variable MODE isnt set or isnt properly set, defaulting to normal");
+    if(process.env.LOGLEVEL === "" || process.env.LOGLEVEL !== "info" || process.env.LOGLEVEL !== "production" || process.env.LOGLEVEL !== "debug" || process.env.LOGLEVEL !== " info" || process.env.LOGLEVEL !== "info ") {
         logger.level = "info";
+        logger.warn("The environment variable LOGLEVEL isnt set or isnt properly set, defaulting to info");
     } else {
-        logger.level = process.env.MODE;
+        logger.level = process.env.LOGLEVEL;
     }
     
     if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
-        console.log("The environment variable PORT isnt set or isnt properly set, defaulting to 8082")
+        logger.warn("The environment variable PORT isnt set or isnt properly set, defaulting to 8082")
         process.env.PORT = 8082
     }
 }
@@ -84,10 +84,10 @@ async function checkUsersCorruption() {
         
         if (answer.clearUsersFile === "Yes") {
             await fs.writeFile("users.json", "[]")
-            console.log("cleared contents of users.json successfully!");
+            logger.info("cleared contents of users.json successfully, relaunch EucoAPI to continue");
             exit(0);
         } else {
-            console.log("Relaunch EucoAPI when you have fixed users.json!");
+            logger.warn("Relaunch EucoAPI when you have fixed users.json!");
             exit(1);
         }
     }
@@ -99,7 +99,7 @@ async function checkUsersCorruption() {
 var Processorusage;
 var DevicesInNetwork;
 
-console.log("Welcome to EucoAPIv0.1")
+logger.info("Welcome to EucoAPIv0.1")
 
 
 let allowedIPs = [];
@@ -111,7 +111,7 @@ fs.readFile("users.json", "utf-8", (err, result) => {
     } finally {
         for (let i = 0; i < result.length; i++) {
             for (var name in result[i]) {
-                console.log(result[i][name].ip);
+                logger.debug(result[i][name].ip);
                 if(result[i]["has-access"] === true) {
                     allowedIPs.push(result[i][name].ip);
                 }
@@ -121,7 +121,8 @@ fs.readFile("users.json", "utf-8", (err, result) => {
 })
 
 
-console.log(allowedIPs)
+logger.debug(allowedIPs)
+
 const speedLimiter = slowDown({
     windowMs: 1 * 60 * 1000, // 1 minute
     delayAfter: 100, // allow 100 requests per minute, then...
@@ -169,37 +170,37 @@ app.get("/auth", function (req, res) {
     })
 })
 
-app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
-    if(process.env.MODE === "debug") {
-        console.log("REQUEST:")
+app.get("/" + process.env.URI, function (req, res) {
+    
+    logger.debug("REQUEST:")
 
-        var requestIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || ''.split(',')[0].trim() || req.socket.localAddress || req.ip
-        if (requestIP.substr(0, 7) == "::ffff:") {
-            requestIP = requestIP.substr(7)
-        }
+    var requestIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || ''.split(',')[0].trim() || req.socket.localAddress || req.ip
+    if (requestIP.substr(0, 7) == "::ffff:") {
+        requestIP = requestIP.substr(7)
+    }
 
 
 
-        var localIP = ip.address()
+    var localIP = ip.address()
 
-        if(req.socket.localAddress === requestIP) {
-            console.log(`IP: this PCs IP (${localIP})`)
-            console.log("LOCATION: Not accessible, the client is in the same network as the server")
+    if(req.socket.localAddress === requestIP) {
+        logger.debug(`IP: this PCs IP (${localIP})`)
+        logger.debug("LOCATION: Not accessible, the client is in the same network as the server")
+    } else {
+        logger.debug(`IP: ${requestIP}`)
+        var ipLocation
+        var requestURL = "http://ip-api.com/json/" + requestIP
+        fetch(requestURL).then(jsonData => jsonData.json()).then(jsonData => {
+            ipLocation = jsonData
+            logger.debug(ipLocation)
+        })
+        if(ipLocation === null) {
+            logger.debug("LOCATION: not accessible or in local network")
         } else {
-            console.log(`IP: ${requestIP}`)
-            var ipLocation
-            var requestURL = "http://ip-api.com/json/" + requestIP
-            fetch(requestURL).then(jsonData => jsonData.json()).then(jsonData => {
-                ipLocation = jsonData
-                console.log(ipLocation)
-            })
-            if(ipLocation === null) {
-                console.log("LOCATION: not accessible or in local network")
-            } else {
-                console.log("LOCATION:" + ipLocation)
-            }
+            logger.debug("LOCATION:" + ipLocation)
         }
     }
+    
     
     req.header("Authentication", "Basic")
     if(ReqCounter === 0) {
@@ -308,13 +309,13 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         
             try {
                 res.send(Buffer.from(JSON.stringify(data)).toString("base64"))
-                console.log("Request made, content served successfully")
-                console.log("content served successfully")
-                if(process.env.MODE === "debug") {
+                logger.info("Request made, content served successfully")
+                logger.info("content served successfully")
+                if(process.env.LOGLEVEL === "debug") {
                     console.log("")
                 }
             } catch(err) {
-            console.log("An error occurred while responding to an API request: ", err)
+                logger.error("An error occurred while responding to an API request: ", err)
             }
         });
     } else {
@@ -403,13 +404,13 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
         
             try {
                 res.send(Buffer.from(JSON.stringify(data)).toString("base64"))
-                console.log("Request made, content served successfully")
-                console.log("content served successfully")
-                if(process.env.MODE === "debug") {
+                logger.debug("Request made, content served successfully")
+                logger.debug("content served successfully")
+                if(process.env.LOGLEVEL === "debug") {
                     console.log("")
                 }
             } catch(err) {
-                console.log("An error occurred while responding to an API request: ", err)
+                logger.error("An error occurred while responding to an API request: ", err)
             }
         });
     }
@@ -417,5 +418,5 @@ app.get("/" + process.env.PATH_AFTER_URL, function (req, res) {
 })
 
 app.listen(process.env.PORT, function () {
-   console.log("API operating at http://localhost:" + process.env.PORT + "/" + process.env.PATH_AFTER_URL)
+   logger.info("API operating at http://localhost:" + process.env.PORT + "/" + process.env.URI)
 })
