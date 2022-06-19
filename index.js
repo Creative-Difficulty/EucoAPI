@@ -24,6 +24,14 @@ dotenv.config()
 
 const __dirname = path.resolve();
 const logger = log4js.getLogger();
+function isJsonString(str) {
+    try {
+        JSON.parse(str);
+    } catch (e) {
+        return false;
+    }
+    return true;
+}
 
 function initLogger() {
     var currentDate = new Date();
@@ -58,49 +66,28 @@ function checkENV() {
     }
 }
 
-fs.readFile("users.json", "utf-8", (err, data) => {
-    try {
-        JSON.parse(data)
-    } catch (e) {
-        inquirer.prompt([{
-            type: "confirm",
-            name: "clearUsersFile",
-            message: "Error reading users file, File is empty or corrupted. Do you want to clear its contents?",
-        }]).then(answer => {
-            if(answer.clearUsersFile === true) {
-                fs.writeFile("users.json", "[]", (data, err) => {
-                    if (err) throw err;
-                })
-            } else {
-                console.log("Relaunch EucoAPI when you have fixed users.json!");
-                //exit(1);
-                
-            }
-        });
-    }
-})
 
 function checkUsersCorruption() {
-
-        /**@deprecated  */ 
-        // if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) {
-        //     inquirer.prompt([{
-        //         type: "confirm",
-        //         name: "clearUsersFile",
-        //         message: "Error reading users file, File is empty or corrupted. Do you want to clear its contents?",
-        //     }]).then( answer => {
-        //         if(answer.clearUsersFile === true) {
-        //             fs.writeFile("users.json", "[]", (data, err) => {
-        //                 if (err) throw err;
-        //             })
-        //         } else {
-        //             console.log("Relaunch EucoAPI when you have fixed users.json!");
-        //             exit(1);
-
-        //         }
-        //     });
-            
-        // };
+    fs.readFile("users.json", "utf-8", (err, data) => {
+        if (!isJsonString(data)) {
+            inquirer.prompt([{
+                choices: ["Yes", "No"],
+                type: "list",
+                name: "clearUsersFile",
+                message: "Error reading users file, File is empty or corrupted. Do you want to clear its contents?",
+            }]).then(answer => {
+                if (answer.clearUsersFile === "Yes") {
+                    fs.writeFile("users.json", "[]", (data, err) => {
+                        if (err) throw err;
+                    });
+                    console.log("cleared contents of users.json successfully!");
+                } else {
+                    console.log("Relaunch EucoAPI when you have fixed users.json!");
+                    exit(1);
+                }
+            });
+        }
+    })
 }
 
 checkENV();
