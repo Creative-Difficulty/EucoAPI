@@ -1,3 +1,4 @@
+import * as fs from "fs/promises";
 import * as process2 from "child_process";
 
 import {dist, fib} from "cpu-benchmark";
@@ -8,7 +9,6 @@ import { exit } from "process";
 import express from "express";
 import fetch from "node-fetch";
 import find from 'local-devices';
-import fs from 'fs';
 import inquirer from "inquirer";
 import ip from "ip";
 import isPi from "detect-rpi";
@@ -73,27 +73,24 @@ function checkENV() {
 }
 
 async function checkUsersCorruption() {
-    fs.readFile("users.json", "utf-8", (err, data) => {
-        if (!isJsonString(data)) {
-            const answer = await inquirer.prompt([{
-                choices: ["Yes", "No"],
-                type: "list",
-                name: "clearUsersFile",
-                message: "Error reading users file, File is empty or corrupted. Do you want to clear its contents?",
-            }])
-            
-            if (answer.clearUsersFile === "Yes") {
-                fs.writeFile("users.json", "[]", (data, err) => {
-                    if (err) throw err;
-                });
-                console.log("cleared contents of users.json successfully!");
-                exit(0);
-            } else {
-                console.log("Relaunch EucoAPI when you have fixed users.json!");
-                exit(1);
-            }
+    const UsersData = await fs.readFile("users.json", "utf-8")
+    if (!isJsonString(UsersData)) {
+        const answer = await inquirer.prompt([{
+            choices: ["Yes", "No"],
+            type: "list",
+            name: "clearUsersFile",
+            message: "Error reading users file, File is empty or corrupted. Do you want to clear its contents?",
+        }])
+        
+        if (answer.clearUsersFile === "Yes") {
+            await fs.writeFile("users.json", "[]")
+            console.log("cleared contents of users.json successfully!");
+            exit(0);
+        } else {
+            console.log("Relaunch EucoAPI when you have fixed users.json!");
+            exit(1);
         }
-    })
+    }
 }
 
 
