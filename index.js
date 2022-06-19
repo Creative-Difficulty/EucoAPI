@@ -22,8 +22,14 @@ import slowDown from "express-slow-down"
 var app = express();
 dotenv.config()
 
+
 const __dirname = path.resolve();
 const logger = log4js.getLogger();
+
+await checkUsersCorruption();
+checkENV();
+initLogger();
+
 function isJsonString(str) {
     try {
         JSON.parse(str);
@@ -66,33 +72,31 @@ function checkENV() {
     }
 }
 
-
-function checkUsersCorruption() {
+async function checkUsersCorruption() {
     fs.readFile("users.json", "utf-8", (err, data) => {
         if (!isJsonString(data)) {
-            inquirer.prompt([{
+            const answer = await inquirer.prompt([{
                 choices: ["Yes", "No"],
                 type: "list",
                 name: "clearUsersFile",
                 message: "Error reading users file, File is empty or corrupted. Do you want to clear its contents?",
-            }]).then(answer => {
-                if (answer.clearUsersFile === "Yes") {
-                    fs.writeFile("users.json", "[]", (data, err) => {
-                        if (err) throw err;
-                    });
-                    console.log("cleared contents of users.json successfully!");
-                } else {
-                    console.log("Relaunch EucoAPI when you have fixed users.json!");
-                    exit(1);
-                }
-            });
+            }])
+            
+            if (answer.clearUsersFile === "Yes") {
+                fs.writeFile("users.json", "[]", (data, err) => {
+                    if (err) throw err;
+                });
+                console.log("cleared contents of users.json successfully!");
+                exit(0);
+            } else {
+                console.log("Relaunch EucoAPI when you have fixed users.json!");
+                exit(1);
+            }
         }
     })
 }
 
-checkENV();
-initLogger();
-checkUsersCorruption();
+
 
 
 var Processorusage;
@@ -103,12 +107,17 @@ console.log("Welcome to EucoAPIv0.1")
 
 let allowedIPs = [];
 fs.readFile("users.json", "utf-8", (err, result) => {
-    result = JSON.parse(result); 
-    for (let i = 0; i < result.length; i++) {
-        for (var name in result[i]) {
-            console.log(result[i][name].ip);
-            if(result[i]["has-access"] === true) {
-                allowedIPs.push(result[i][name].ip);
+    try {
+        result = JSON.parse(result); 
+    } catch(e) {
+        //checkUsersCorruption();
+    } finally {
+        for (let i = 0; i < result.length; i++) {
+            for (var name in result[i]) {
+                console.log(result[i][name].ip);
+                if(result[i]["has-access"] === true) {
+                    allowedIPs.push(result[i][name].ip);
+                }
             }
         }
     }
