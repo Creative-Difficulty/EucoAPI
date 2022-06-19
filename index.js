@@ -58,27 +58,29 @@ function checkENV() {
     }
 }
 
-function checkUsersCorruption() {
-    fs.readFile("users.json", "utf-8", (err, data) => {
-        try {
-            data = JSON.parse(data);
-        } catch (e) {
-            inquirer.prompt([{
-                type: "confirm",
-                name: "clearUsersFile",
-                message: "Error reading users file, File is empty or corrupted. Do you want to clear its contents?",
-            }]).then( answer => {
-                if(answer.clearUsersFile === true) {
-                    fs.writeFile("users.json", "[]", (data, err) => {
-                        if (err) throw err;
-                    })
-                } else {
-                    console.log("Relaunch EucoAPI when you have fixed users.json!");
-                    exit(1);
+fs.readFile("users.json", "utf-8", (err, data) => {
+    try {
+        JSON.parse(data)
+    } catch (e) {
+        inquirer.prompt([{
+            type: "confirm",
+            name: "clearUsersFile",
+            message: "Error reading users file, File is empty or corrupted. Do you want to clear its contents?",
+        }]).then(answer => {
+            if(answer.clearUsersFile === true) {
+                fs.writeFile("users.json", "[]", (data, err) => {
+                    if (err) throw err;
+                })
+            } else {
+                console.log("Relaunch EucoAPI when you have fixed users.json!");
+                //exit(1);
+                
+            }
+        });
+    }
+})
 
-                }
-            });
-        }
+function checkUsersCorruption() {
 
         /**@deprecated  */ 
         // if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) {
@@ -99,7 +101,6 @@ function checkUsersCorruption() {
         //     });
             
         // };
-    })
 }
 
 checkENV();
