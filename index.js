@@ -4,13 +4,12 @@ import * as process2 from "child_process";
 import {dist, fib} from "cpu-benchmark";
 
 import checkENV from "./lib/checkENV.js";
+import checkUsersCorruption from "./lib/checkUsersCorruption.js";
 import crypto from 'crypto';
-import { exit } from "process";
 import express from "express";
 import fetch from "node-fetch";
 import find from 'local-devices';
 import initLogger from "./lib/initLogger.js";
-import inquirer from "inquirer";
 import ip from "ip";
 import isPi from "detect-rpi";
 import log4js from 'log4js';
@@ -34,39 +33,6 @@ const LoggerConfig = await initLogger();
 log4js.configure(LoggerConfig)
 
 logger.debug("hi");
-
-function isJsonString(str) {
-    try {
-        JSON.parse(str);
-    } catch (e) {
-        return false;
-    }
-    return true;
-}
-
-async function checkUsersCorruption() {
-    const UsersData = await fs.readFile("users.json", "utf-8")
-    if (!isJsonString(UsersData)) {
-        const answer = await inquirer.prompt([{
-            choices: ["Yes", "No"],
-            type: "list",
-            name: "clearUsersFile",
-            message: "Error reading users file, File is empty or corrupted. Do you want to clear its contents?",
-        }])
-        
-        if (answer.clearUsersFile === "Yes") {
-            await fs.writeFile("users.json", "[]")
-            logger.info("cleared contents of users.json successfully, relaunch EucoAPI to continue");
-            exit(0);
-        } else {
-            logger.warn("Relaunch EucoAPI when you have fixed users.json!");
-            exit(1);
-        }
-    }
-}
-
-
-
 
 var Processorusage;
 var DevicesInNetwork;
