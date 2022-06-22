@@ -3,32 +3,37 @@ import * as process2 from "child_process";
 
 import {dist, fib} from "cpu-benchmark";
 
+import checkENV from "./lib/checkENV.js";
 import crypto from 'crypto';
-import dotenv from 'dotenv';
 import { exit } from "process";
 import express from "express";
 import fetch from "node-fetch";
 import find from 'local-devices';
+import initLogger from "./lib/initLogger.js";
 import inquirer from "inquirer";
 import ip from "ip";
 import isPi from "detect-rpi";
 import log4js from 'log4js';
 import osu from "node-os-utils";
-import path from 'path';
 import rateLimit from 'express-rate-limit'
 import si from "systeminformation";
 import slowDown from "express-slow-down"
 
 var app = express();
-dotenv.config()
 
-
-const __dirname = path.resolve();
-const logger = log4js.getLogger();
 
 await checkUsersCorruption();
-checkENV();
-initLogger();
+
+const ENVvalues = await checkENV();
+process.env.PORT = ENVvalues[0]
+process.env.LOGLEVEL = ENVvalues[1]
+process.env.URI = ENVvalues[2]
+
+const logger = log4js.getLogger();
+const LoggerConfig = await initLogger();
+log4js.configure(LoggerConfig)
+
+logger.debug("hi");
 
 function isJsonString(str) {
     try {
@@ -37,39 +42,6 @@ function isJsonString(str) {
         return false;
     }
     return true;
-}
-
-function initLogger() {
-    var currentDate = new Date();
-    var LogName = currentDate.getDate() + "." +  (parseInt(currentDate.getMonth()) + 1) + "." + currentDate.getFullYear() + "@" + currentDate.getHours() + ":" + currentDate.getMinutes() + ":" + currentDate.getSeconds();
-    log4js.configure({
-        appenders: {
-            fileAppender: { type: 'file', filename: path.join(__dirname, "logs",  LogName + ".log")},
-            console: { type: 'console' }
-        },
-        categories: {
-            default: { appenders: ['fileAppender', 'console'], level: 'error' }
-        }
-    });
-}
-
-function checkENV() {
-    if(/\s/.test(process.env.URI)) {
-        logger.warn("The environment variable URI contains a whitespace, defaulting to none");
-        process.env.URI = ""
-    }
-    
-    if(process.env.LOGLEVEL === "" || process.env.LOGLEVEL !== "info" || process.env.LOGLEVEL !== "production" || process.env.LOGLEVEL !== "debug" || process.env.LOGLEVEL !== " info" || process.env.LOGLEVEL !== "info ") {
-        logger.level = "info";
-        logger.warn("The environment variable LOGLEVEL isnt set or isnt properly set, defaulting to info");
-    } else {
-        logger.level = process.env.LOGLEVEL;
-    }
-    
-    if(process.env.PORT === ""|| /\s/.test(process.env.PORT)) {
-        logger.warn("The environment variable PORT isnt set or isnt properly set, defaulting to 8082")
-        process.env.PORT = 8082
-    }
 }
 
 async function checkUsersCorruption() {
