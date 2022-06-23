@@ -32,7 +32,7 @@ const logger = log4js.getLogger();
 const LoggerConfig = await initLogger();
 log4js.configure(LoggerConfig)
 
-logger.debug("hi");
+//logger.debug("does this work?");
 
 var Processorusage;
 var DevicesInNetwork;
