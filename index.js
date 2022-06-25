@@ -68,7 +68,7 @@ const rateLimiter = rateLimit({
 });
 
 app.use(speedLimiter);
-app.use(rateLimit);
+app.use(rateLimiter);
 
 app.use(express.json())
 await si.networkStats()
@@ -77,28 +77,26 @@ var ReqCounter = 0;
 
 app.get("/auth", async function (req, res) {
     const token = crypto.randomBytes(48).toString('hex');
-    fs.readFile("users.json", "utf-8", async (err, data) => {
-        if (err) throw err;
+    const data = await fs.readFile("users.json", "utf-8")
 
-        if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) throw new Error("Something went wrong");
-        var parsedData = JSON.parse(data);
+    if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) throw new Error("Something went wrong");
+    var parsedData = JSON.parse(data);
 
-        const newUser = {
-            "has-access": false,
-            "ip": req.ip,
-            "token": token
-        }
+    const newUser = {
+        "has-access": false,
+        "ip": req.ip,
+        "token": token
+    }
 
-        parsedData.push(newUser);
-        await fs.writeFile("users.json", JSON.stringify(parsedData), (data, err) => {if (err) throw err;});
-    });
+    parsedData.push(newUser);
+    await fs.writeFile("users.json", JSON.stringify(parsedData), (data, err) => {if (err) throw err;});
     
     res.send({
         "token": token
     })
 })
 
-app.get("/" + process.env.URI, async (req, res) => {
+app.get("/" + process.env.URI, async function (req, res) {
     
     logger.debug("REQUEST:")
 
@@ -109,17 +107,21 @@ app.get("/" + process.env.URI, async (req, res) => {
         logger.debug(`  IP: this PCs IP (${localIP})`)
         logger.debug("  LOCATION: Not accessible, the client is in the same network as the server")
     } else {
-        logger.debug(`IP: ${readableRequestIP}`)
-        var ipLocation
-        var requestURL = "http://ip-api.com/json/" + readableRequestIP
-        fetch(requestURL).then(jsonData => jsonData.json()).then(jsonData => {
-            ipLocation = jsonData
-            logger.debug(ipLocation)
-        })
+        logger.debug(`IP: ${ requestIP}`)
+        var requestURL = "http://ip-api.com/json/" + requestIP
+        const ipLocation = await fetch(requestURL)
         if(ipLocation === null) {
             logger.debug("LOCATION: not accessible or in local network")
         } else {
-            logger.debug("LOCATION:" + ipLocation)
+            logger.debug("LOCATION:")
+            logger.debug("  COUNTRY: " + ipLocation.country)
+            logger.debug("  CITY: " + ipLocation.city)
+            logger.debug("  TIMEZONE: " + ipLocation.timezone)
+            logger.debug("  INTERNET SERVICE PROVIDER: " + ipLocation.isp)
+            logger.debug("  LATITUDE: " + ipLocation.lat)
+            logger.debug("  LONGITUDE: " + ipLocation.lon)
+            
+            
         }
     }
 
