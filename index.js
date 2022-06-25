@@ -27,8 +27,6 @@ const logger = log4js.getLogger();
 const LoggerConfig = await initLogger();
 log4js.configure(LoggerConfig)
 
-//logger.debug("does this work?");
-
 logger.info("Welcome to EucoAPIv0.1")
 
 
@@ -60,7 +58,7 @@ const speedLimiter = slowDown({
     //skip: ""
 });
 
-const apiLimiter = rateLimit({
+const rateLimiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
 	max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
 	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
@@ -69,8 +67,8 @@ const apiLimiter = rateLimit({
     //skip: ""
 });
 
-app.use(speedLimiter)
-app.use(apiLimiter)
+app.use(speedLimiter);
+app.use(rateLimit);
 
 app.use(express.json())
 await si.networkStats()
