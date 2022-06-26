@@ -8,6 +8,7 @@ import fetch from "node-fetch";
 import getSystemData from "./lib/getSystemData.js";
 import initLogger from "./lib/initLogger.js";
 import ip from "ip";
+import { isIPv4 } from "net";
 import log4js from 'log4js';
 import rateLimit from 'express-rate-limit'
 import si from "systeminformation";
@@ -98,7 +99,7 @@ app.get("/auth", async function (req, res) {
 
 app.get("/" + process.env.URI, async function (req, res) {
     
-    logger.debug("REQUEST:")
+    logger.debug("NEW REQUEST:")
 
     var requestIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || ''.split(',')[0].trim() || req.socket.localAddress || req.ip
     var localIP = ip.address()
@@ -107,9 +108,17 @@ app.get("/" + process.env.URI, async function (req, res) {
         logger.debug(`  IP: this PCs IP (${localIP})`)
         logger.debug("  LOCATION: Not accessible, the client is in the same network as the server")
     } else {
+        if(isIPv4(requestIP)) {
+            if (requestIP.substr(0, 7) == "::ffff:") {
+                requestIP = requestIP.substr(7)
+            }
+        }
+        
         logger.debug(`IP: ${ requestIP}`)
         var requestURL = "http://ip-api.com/json/" + requestIP
-        const ipLocation = await fetch(requestURL)
+        var ipLocation = await fetch(requestURL).then(data => data.json())
+        //JSON.parse(ipLocation);
+        console.log(ipLocation)
         if(ipLocation === null) {
             logger.debug("LOCATION: not accessible or in local network")
         } else {
@@ -120,19 +129,19 @@ app.get("/" + process.env.URI, async function (req, res) {
             logger.debug("  INTERNET SERVICE PROVIDER: " + ipLocation.isp)
             logger.debug("  LATITUDE: " + ipLocation.lat)
             logger.debug("  LONGITUDE: " + ipLocation.lon)
-            
-            
         }
     }
-
+    var start = new Date()
     const data = await getSystemData(ReqCounter);
-
+    var stop = new Date()
+    logger.debug(`Time Taken to get System data: ${(stop - start)/1000}s`)
     try {
+        start = new Date()
         res.send(Buffer.from(JSON.stringify(data)).toString("base64"))
-        logger.debug("Request made, content served successfully")
-        logger.debug("content served successfully")
+        stop = new Date()
+        logger.debug(`Time Taken to serve JSON to client: ${(stop - start)/1000}s`)
         if(logger.isDebugEnabled()) {
-            console.log("")
+            logger.debug("\t")
         }
     } catch(err) {
         logger.error("An error occurred while responding to an API request: ", err)
