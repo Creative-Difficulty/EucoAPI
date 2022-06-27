@@ -1,12 +1,12 @@
 import * as fs from "fs/promises";
 
-import checkENV from "./lib/checkENV.js";
-import checkUsersCorruption from "./lib/checkUsersCorruption.js";
+import checkHeaders from "./lib/connection/checkHeaders.js";
+import checkUsersCorruption from "./lib/util/checkUsersCorruption.js";
 import crypto from 'crypto';
 import express from "express";
 import fetch from "node-fetch";
 import getSystemData from "./lib/getSystemData.js";
-import initLogger from "./lib/initLogger.js";
+import initLogger from "./lib/util/initLogger.js";
 import ip from "ip";
 import { isIPv4 } from "net";
 import log4js from 'log4js';
@@ -19,38 +19,11 @@ var app = express();
 
 await checkUsersCorruption();
 
-const ENVvalues = await checkENV();
-process.env.PORT = ENVvalues[0]
-process.env.LOGLEVEL = ENVvalues[1]
-process.env.URI = ENVvalues[2]
-
 const logger = log4js.getLogger();
 const LoggerConfig = await initLogger();
 log4js.configure(LoggerConfig)
 
 logger.info("Welcome to EucoAPIv0.1")
-
-
-let allowedIPs = [];
-fs.readFile("users.json", "utf-8", (err, result) => {
-    try {
-        result = JSON.parse(result); 
-    } catch(e) {
-        //checkUsersCorruption();
-    } finally {
-        for (let i = 0; i < result.length; i++) {
-            for (var name in result[i]) {
-                //logger.debug(result[i][name].ip);
-                if(result[i]["has-access"] === true) {
-                    allowedIPs.push(result[i][name].ip);
-                }
-            }
-        }
-    }
-})
-
-
-//logger.debug(allowedIPs)
 
 const speedLimiter = slowDown({
     windowMs: 1 * 60 * 1000, // 1 minute
@@ -80,7 +53,7 @@ app.get("/auth", async function (req, res) {
     const token = crypto.randomBytes(48).toString('hex');
     const data = await fs.readFile("users.json", "utf-8")
 
-    if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) throw new Error("Something went wrong");
+    if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) await checkUsersCorruption();
     var parsedData = JSON.parse(data);
 
     const newUser = {
@@ -98,6 +71,16 @@ app.get("/auth", async function (req, res) {
 })
 
 app.get("/" + process.env.URI, async function (req, res) {
+    
+    const isAuthorized = await checkHeaders(req.headers);
+    if(isAuthorized === false) {
+        res.send({
+            "Error": "Unauthorized",
+            "Instructions": "vist /auth, then set has-access of your token in the users.json file to true. Now provide your token as \"authentication\" header at this endpoint!",
+            "ErrorCode": 401
+        })
+        return;
+    }
     
     logger.debug("NEW REQUEST:")
 
