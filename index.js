@@ -74,7 +74,7 @@ app.get("/" + process.env.URI, async function (req, res) {
     
     const isAuthorized = await checkHeaders(req.headers);
     if(isAuthorized === false) {
-        res.send({
+        res.status(401).send({
             "Error": "Unauthorized",
             "Instructions": "vist /auth, then set has-access of your token in the users.json file to true. Now provide your token as \"authentication\" header at this endpoint!",
             "ErrorCode": 401
