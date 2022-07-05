@@ -83,7 +83,7 @@ async function getSystemDataBeforeRequest() {
 await getSystemDataBeforeRequest();
 setInterval(await getSystemDataBeforeRequest, 15000);
 
-console.dir(data, {depth: null});
+//console.dir(data, {depth: null});
 app.get("/" + process.env.URI, async function (req, res) {
     
     const isAuthorized = await checkHeaders(req.headers);
