@@ -33,8 +33,8 @@ const speedLimiter = slowDown({
 });
 
 const rateLimiter = rateLimit({
-	windowMs: 15 * 60 * 1000, // 15 minutes
-	max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+	windowMs: 1 * 60 * 1000, // 15 minutes
+	max: 3000, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
 	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
 	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
     message: {"Error" : "Too many requests"},
@@ -70,6 +70,20 @@ app.get("/auth", async function (req, res) {
     })
 })
 
+var data;
+var start, stop;
+async function getSystemDataBeforeRequest() {
+    logger.debug("Getting System data...");
+    start = new Date();
+    data = await getSystemData(ReqCounter);
+    stop = new Date();
+    logger.debug(`Time Taken to get System data: ${(stop - start)/1000}s`);
+}
+
+await getSystemDataBeforeRequest();
+setInterval(await getSystemDataBeforeRequest, 15000);
+
+console.dir(data, {depth: null});
 app.get("/" + process.env.URI, async function (req, res) {
     
     const isAuthorized = await checkHeaders(req.headers);
@@ -114,15 +128,17 @@ app.get("/" + process.env.URI, async function (req, res) {
             logger.debug("  LONGITUDE: " + ipLocation.lon)
         }
     }
-    var start = new Date()
-    const data = await getSystemData(ReqCounter);
-    var stop = new Date()
-    logger.debug(`Time Taken to get System data: ${(stop - start)/1000}s`)
+    
     try {
         start = new Date()
-        res.send(Buffer.from(JSON.stringify(data)).toString("base64"))
+        var base64Data = Buffer.from(JSON.stringify(data)).toString("base64")
+        stop = new Date()
+        logger.debug(`Time Taken to covert JSON to Base64: ${(stop - start)/1000}s`)
+        start = new Date()
+        res.send(base64Data)
         stop = new Date()
         logger.debug(`Time Taken to serve JSON to client: ${(stop - start)/1000}s`)
+        
         if(logger.isDebugEnabled()) {
             logger.debug("\t")
         }
