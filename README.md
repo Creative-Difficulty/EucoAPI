@@ -12,7 +12,7 @@ A JSON REST API for computer parameters and performance built with NodeJS and us
  
 ## Docker 🐳
  
- After successfully cloning (```git clone https://github.com/Creative-Difficulty/EucoAPI/```) this repository, first run ```bash cd EucoAPI```.
+ After successfully cloning (```git clone https://github.com/Creative-Difficulty/EucoAPI/```) this repository, first run `cd EucoAPI`.
  Run ```bash
  docker build . -t creative-difficulty/eucoapi_1``` to build the container (this might take a while). To verify that you have installed the image successfully, run ```docker images```. You should see ```creative-difficulty/eucoapi_1``` in the list.
 Now type 
