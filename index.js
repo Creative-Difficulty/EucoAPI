@@ -1,4 +1,4 @@
-import * as fs from "fs/promises";
+import * as fs2 from "fs/promises";
 
 import checkHeaders from "./lib/connection/checkHeaders.js";
 import checkUsersCorruption from "./lib/util/checkUsersCorruption.js";
