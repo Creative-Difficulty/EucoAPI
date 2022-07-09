@@ -51,7 +51,7 @@ var ReqCounter = 0;
 
 app.get("/auth", async function (req, res) {
     const token = crypto.randomBytes(48).toString('hex');
-    const data = await fs.readFile("users.json", "utf-8")
+    const data = await fs2.readFile("users.json", "utf-8")
 
     if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) await checkUsersCorruption();
     var parsedData = JSON.parse(data);
@@ -63,7 +63,7 @@ app.get("/auth", async function (req, res) {
     }
 
     parsedData.push(newUser);
-    await fs.writeFile("users.json", JSON.stringify(parsedData), (data, err) => {if (err) throw err;});
+    await fs2.writeFile("users.json", JSON.stringify(parsedData), (data, err) => {if (err) throw err;});
     
     res.send({
         "token": token
