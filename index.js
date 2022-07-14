@@ -130,13 +130,13 @@ app.get("/" + process.env.URI, async function (req, res) {
     }
     
     try {
-        start = new Date()
-        var base64Data = Buffer.from(JSON.stringify(data)).toString("base64")
-        stop = new Date()
-        logger.debug(`Time Taken to covert JSON to Base64: ${(stop - start)/1000}s`)
-        start = new Date()
-        res.send(base64Data)
-        stop = new Date()
+        start = new Date();
+        var base64Data = Buffer.from(JSON.stringify(data)).toString("base64");
+        stop = new Date();
+        logger.debug(`Time Taken to covert JSON to Base64: ${(stop - start)/1000}s`);
+        start = new Date();
+        res.send(base64Data);
+        stop = new Date();
         logger.debug(`Time Taken to serve JSON to client: ${(stop - start)/1000}s`)
         
         if(logger.isDebugEnabled()) {
