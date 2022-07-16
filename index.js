@@ -1,5 +1,3 @@
-import * as fs2 from "fs/promises";
-
 import checkHeaders from "./lib/connection/checkHeaders.js";
 import checkUsersCorruption from "./lib/util/checkUsersCorruption.js";
 import crypto from 'crypto';
@@ -13,13 +11,16 @@ import log4js from 'log4js';
 import rateLimit from 'express-rate-limit'
 import si from "systeminformation";
 import slowDown from "express-slow-down"
+import fs from "fs";
+import { exit } from "process";
+import isJsonString from "./lib/util/isJSONString.js";
 
 var app = express();
 
 
 await checkUsersCorruption();
 
-const logger = log4js.getLogger();
+const logger = log4js.getLogger("default");
 const LoggerConfig = await initLogger();
 log4js.configure(LoggerConfig)
 
@@ -53,7 +54,7 @@ app.get("/auth", async function (req, res) {
     const token = crypto.randomBytes(48).toString('hex');
     const data = await fs2.readFile("users.json", "utf-8")
 
-    if(!data.includes("[") || !data.includes("]") || data === "" || data === null || data === undefined) await checkUsersCorruption();
+    if(!isJsonString(data)) await checkUsersCorruption();
     var parsedData = JSON.parse(data);
 
     const newUser = {
@@ -63,7 +64,12 @@ app.get("/auth", async function (req, res) {
     }
 
     parsedData.push(newUser);
-    await fs2.writeFile("users.json", JSON.stringify(parsedData), (data, err) => {if (err) throw err;});
+    try {
+        await fs.promises.writeFile("users.json", JSON.stringify(parsedData));
+    } catch(e) {
+        logger.error(e);
+        exit(1)
+    }
     
     res.send({
         "token": token
